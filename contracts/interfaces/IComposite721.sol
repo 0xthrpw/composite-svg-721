@@ -46,4 +46,5 @@ interface IComposite721 {
   function balanceOf ( address _owner ) external returns ( uint256 );
 
   function ownerOf ( uint256 id ) external returns ( address );
+
 }

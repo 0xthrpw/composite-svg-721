@@ -29,13 +29,13 @@ library NFTSVG {
   }
 
   function _generateSVGPaths(SVGParams memory params) private view returns (string memory svgPaths) {
-    string memory svgPaths;
+    
 
     uint256 pos_x = 40;
     uint256 pos_y = 40;
     uint256 w = 80;
     uint256 po = 40;
-    ( uint256 width, string memory base ) = idToColor(params.tokenId, params.tokenId + 1, params.owner);
+    ( , string memory base ) = idToColor(params.tokenId, params.tokenId + 1, params.owner);
 
     for(uint256 r = 0; r < 10; ++r){
       pos_x = 40;

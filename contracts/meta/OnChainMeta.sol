@@ -4,9 +4,11 @@ pragma solidity ^0.8.11;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
 import './NFTSVG.sol';
+import './Composite.sol';
 
 contract OnChainMeta {
     using Strings for uint256;
+    using Composite for Composite.Settings;
 
     /// @dev A mask for isolating an item's group ID.
     uint256 private constant GROUP_MASK = uint256(type(uint128).max) << 128;
@@ -14,6 +16,8 @@ contract OnChainMeta {
     string public metaDescription = 'You have to be a sea in order to absorb a dirty stream without getting dirty.';
 
     function _buildMeta(uint256 _tokenId, address _owner) internal view returns (string memory) {
+
+      //string memory svgHead = Composite.generateHead(_settings); 
 
       string memory imageDat = string(abi.encodePacked(
         '{"name":"',
@@ -39,13 +43,13 @@ contract OnChainMeta {
       return image;
     }
 
-    function _buildName(uint256 _tokenId) internal view returns (string memory) {
+    function _buildName(uint256 _tokenId) internal pure returns (string memory) {
       uint256 groupId = (_tokenId & GROUP_MASK) >> 128;
       uint256 id = _tokenId << 128 >> 128;
       return string(abi.encodePacked("SEAGLASS #", id.toString()));
     }
 
-    function _getMetadata(uint256 _tokenId) internal view returns (string memory) {
+    function _getMetadata(uint256 _tokenId) internal pure returns (string memory) {
       uint256 groupId = (_tokenId & GROUP_MASK) >> 128;
       uint256 id = _tokenId << 128 >> 128;
       string memory metadata = string(abi.encodePacked(
