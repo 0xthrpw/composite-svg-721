@@ -61,9 +61,9 @@ describe('Composite721', function() {
   // Perform those tests utilizing minted tokens.
   context('with minted tokens', async function() {
     beforeEach(async function() {
-      await composite721.connect(alice.signer).mint_Qgo(alice.address, 1);
-      await composite721.connect(alice.signer).mint_Qgo(bob.address, 2);
-      await composite721.connect(alice.signer).mint_Qgo(carol.address, 3);
+      await composite721.connect(alice.signer).mint(alice.address, 1);
+      await composite721.connect(alice.signer).mint(bob.address, 2);
+      await composite721.connect(alice.signer).mint(carol.address, 3);
     });
 
     // Confirm that we can retrieve balance of holder tokens.
@@ -313,7 +313,7 @@ describe('Composite721', function() {
   // Test minting tokens.
   context('mint', async function() {
     it('successfully mints a single token', async function() {
-      const mint = await composite721.mint_Qgo(alice.address, 1);
+      const mint = await composite721.mint(alice.address, 1);
       await expect(mint).to
         .emit(composite721, 'Transfer')
         .withArgs(ethers.constants.AddressZero, alice.address, 1);
@@ -324,7 +324,7 @@ describe('Composite721', function() {
     });
 
     it('successfully mints multiple tokens', async function() {
-      const mint = await composite721.mint_Qgo(alice.address, 5);
+      const mint = await composite721.mint(alice.address, 5);
       for (let tokenId = 0; tokenId < 5; tokenId++) {
         await expect(mint).to
           .emit(composite721, 'Transfer')
@@ -337,27 +337,27 @@ describe('Composite721', function() {
     });
 
     it('does not revert for non-receivers', async function() {
-      await composite721.mint_Qgo(composite721.address, 1);
+      await composite721.mint(composite721.address, 1);
       let ownerOne = await composite721.ownerOf(1);
       ownerOne.should.be.equal(composite721.address);
     });
 
     it('rejects mints to the zero address', async function() {
       await expect(
-        composite721.connect(alice.signer).mint_Qgo(ethers.constants.AddressZero, 1)
+        composite721.connect(alice.signer).mint(ethers.constants.AddressZero, 1)
       ).to.be.revertedWith('MintToZeroAddress');
     });
 
     it('requires quantity to be greater than 0', async function() {
       await expect(
-        composite721.connect(alice.signer).mint_Qgo(alice.address, 0)
+        composite721.connect(alice.signer).mint(alice.address, 0)
       ).to.be.revertedWith('MintZeroQuantity');
     });
   });
 
   context('make a file', async function() {
     it('successfully mints a single token', async function() {
-      const mint = await composite721.mint_Qgo(alice.address, 1);
+      const mint = await composite721.mint(alice.address, 1);
       await expect(mint).to
         .emit(composite721, 'Transfer')
         .withArgs(ethers.constants.AddressZero, alice.address, 1);
