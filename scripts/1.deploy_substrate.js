@@ -47,7 +47,8 @@ async function main() {
     ITEM_NAME,
     ITEM_SYMBOL,
     CAP,
-    SETTINGS
+    SETTINGS,
+    ethers.constants.AddressZero
   );
 
   let composite721Deployed = await composite721.deployed();

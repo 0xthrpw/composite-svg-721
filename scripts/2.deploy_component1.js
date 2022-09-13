@@ -7,6 +7,7 @@ const { ethers } = require('hardhat');
 const ITEM_NAME = 'Component 1';
 const ITEM_SYMBOL = 'C1';
 const CAP = 100;
+SUBSTRATE_ADDRESS = '0x1FE2853c71006F03A6eA0a4EEeD97507C6e3A6f9';
 
 async function logTransactionGas(transaction) {
   let transactionReceipt = await transaction.wait();
@@ -47,7 +48,8 @@ async function main() {
     ITEM_NAME,
     ITEM_SYMBOL,
     CAP,
-    SETTINGS
+    SETTINGS,
+    SUBSTRATE_ADDRESS
   );
 
   let composite721Deployed = await composite721.deployed();

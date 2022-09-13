@@ -6,6 +6,7 @@ const { ethers } = require('hardhat');
 const { expect } = require('chai');
 const { should } = require('chai').should();
 const fs = require('fs');
+
 /**
   Describe the contract testing suite, retrieve testing wallets, and create
   contract factories from the artifacts we are testing.
@@ -40,7 +41,8 @@ describe('Composite721', function() {
                 0,
                 1000,
                 1000
-            ]
+            ],
+            ethers.constants.AddressZero
         );
         await substrate721.deployed();
 
@@ -54,7 +56,8 @@ describe('Composite721', function() {
                 1,
                 500,
                 500
-            ]
+            ],
+            substrate721.address
         );
         await composite721_1.deployed();
 
@@ -68,24 +71,129 @@ describe('Composite721', function() {
                 2,
                 100,
                 100
-            ]
+            ],
+            substrate721.address
         );
         await composite721_2.deployed();
+
+        await substrate721.mint(bob.address, 1);
+
+        await composite721_1.mint(bob.address, 1);
+
+        await composite721_2.mint(bob.address, 1);
   
     });
 
     // Confirm that ownership is correctly tracked.
     describe('ownerOf', async function() {
         it('mint substrate', async function() {
-            await substrate721.mint(bob.address, 1);
 
-            await composite721_1.mint(bob.address, 1);
-            // let ownerOne = await tiny721.connect(alice.signer).ownerOf(1);
-            // ownerOne.should.be.equal(alice.address);
-            // let ownerTwo = await tiny721.connect(alice.signer).ownerOf(2);
-            // ownerTwo.should.be.equal(bob.address);
-            // let ownerFour = await tiny721.connect(alice.signer).ownerOf(4);
-            // ownerFour.should.be.equal(carol.address);
+            let ownerSubstrate = await substrate721.ownerOf(1);
+            let ownerComponent = await composite721_1.ownerOf(1);
+
+            //console.log("owners", ownerSubstrate, ownerComponent);
+            //console.log("contracts", substrate721.address, composite721_1.address);
+
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+
+            await substrate721.connect(bob.signer).rmLayer(
+                1,
+                1  
+            );
+
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+        });
+
+        it('reverts when adding assigned layer', async function() {
+
+
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+
+            await expect(
+                substrate721.connect(bob.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('LayerInUse');
+
+        });
+
+        it('Components: reverts when adding assigned layer', async function() {
+            const svgData = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
+
+            await expect(
+                composite721_1.connect(bob.signer).setComponent(svgData)
+            ).to.be.revertedWith('Ownable: caller is not the owner');
+
+            await composite721_1.connect(alice.signer).setComponent(svgData);
+            await composite721_1.connect(alice.signer).toggleComponent(true);
+
+            // await expect(
+            //     composite721_1.connect(bob.signer).addLayer(
+            //         1, 
+            //         [
+            //             composite721_1.address,
+            //             1
+            //         ]
+            //     )
+            // ).to.be.revertedWith('RecursiveLayer');
+
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+
+            const metadata = await substrate721.connect(bob.signer).tokenURI(1);
+            const trimmedMeta = metadata.substring(29);
+            const decodedMetadata = Buffer.from(trimmedMeta, 'base64');
+            const stringMetadata = decodedMetadata.toString('ascii');
+
+            //console.log("meta", metadata, stringMetadata);
+
+            const parsedMeta = JSON.parse(stringMetadata);
+            const imageData = parsedMeta.image.substring(26);
+            const decodedImage = Buffer.from(imageData, 'base64');
+            const imageString = decodedImage.toString('ascii');
+
+            //console.log("decodedImage", imageString);
+
+            //fs.writeFileSync('test/token.svg', imageString);
+
+
+
+            // await substrate721.connect(bob.signer).addLayer(
+            //     1, 
+            //     [
+            //         composite721_1.address,
+            //         1
+            //     ]
+            // );
+
+
         });
     
         // Because the zero address is a valid owner, we would like `ownerOf` to
