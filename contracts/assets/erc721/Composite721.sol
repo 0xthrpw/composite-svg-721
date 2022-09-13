@@ -6,8 +6,16 @@ import "../../meta/Composite.sol";
 import "../../meta/OnChainMeta.sol";
 import "../../interfaces/IComposite721.sol";
 
+error LayerOwnerNotSender();
+error NoLayersInComponent();
+error RecursiveLayer();
+
 interface IComp721 {
     function getItemSettings () external returns ( Composite.Settings memory );
+    function componentData ( ) external returns ( string memory );
+    function isComponent ( ) external returns ( bool );
+    function ownerOf ( uint256 id ) external returns ( address );
+    function svgData ( uint256 id ) external returns ( string memory );
 }
 
 contract Composite721 is Tiny721, OnChainMeta {
@@ -21,12 +29,17 @@ contract Composite721 is Tiny721, OnChainMeta {
         address item;
         uint256 id;
     }
+
+    bool public isComponent;
+
+    string public componentData;
     
     /// item id > z index > layer data
     mapping ( uint256 => mapping ( uint256 => Layer )) public layers;
 
     /// item id > number of image layers
     mapping ( uint256 => uint256 ) public layerCounts;
+
 
     /**
         A modifier to see if a caller is an approved administrator.
@@ -37,6 +50,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         }
         _;
     }
+
 
     /**
         Construct a new instance of this ERC-721 contract.
@@ -55,6 +69,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         settings = _settings;
     }
 
+
     /**
         Token owners can use this function to add a layer to a given item that 
         they possess.
@@ -63,16 +78,38 @@ contract Composite721 is Tiny721, OnChainMeta {
         @param _layer The data to add to the layer, { item address, item id }
 
     */
-   function addLayer (
+    function addLayer (
         uint256 _id,
         Layer memory _layer
-   ) public onlyTokenOwner(_id) {
-        // get composite item instance
-        IComp721 compositeItem = IComp721(_layer.item);
+    ) public onlyTokenOwner(_id) {
+        // prevent recursive assignment
+        if(_layer.id == _id && _layer.item == address(this)){
+            revert RecursiveLayer();
+        }
 
+        // require not in component status
+        if(isComponent){
+            revert NoLayersInComponent();
+        }
+        
         // get the settings from the item contract
-        Composite.Settings memory itemSettings = compositeItem.getItemSettings();
+        Composite.Settings memory itemSettings;
+        address layerOwner; 
 
+        if(_layer.item == address(this)){
+            itemSettings = settings;
+            layerOwner = this.ownerOf(_layer.id);
+        }else{
+            IComp721 compositeItem = IComp721(_layer.item);
+            layerOwner = compositeItem.ownerOf(_layer.id);
+            itemSettings = compositeItem.getItemSettings();
+        }
+
+        // require layer token owner
+        if(_msgSender() != layerOwner){
+            revert LayerOwnerNotSender();
+        }
+        
         // specifically the z index so we know where to put the layer
         uint256 zIndex = itemSettings.z;
 
@@ -86,7 +123,8 @@ contract Composite721 is Tiny721, OnChainMeta {
 
         // save layer data
         layers[_id][zIndex] = _layer;
-   }
+    }
+
 
     /**
         Return the token URI of the token with the specified `_id`.
@@ -103,6 +141,21 @@ contract Composite721 is Tiny721, OnChainMeta {
         return _buildMeta(_id, address(0));
     }
 
+
+    /**
+        Change item component status.  This prevents an item from 
+        possessing 'layers' and represents the leaf on a branch on a tree of 
+        layer recursion
+
+        @param _status is component or not
+    */
+    function toggleComponent (
+        bool _status
+    ) external onlyOwner {
+        isComponent = _status;
+    }
+
+
     /**
         Return the SVG data of the token with the specified `_id`.
 
@@ -112,21 +165,50 @@ contract Composite721 is Tiny721, OnChainMeta {
     */
     function svgData (
         uint256 _id 
-    ) external view returns (string memory) {
+    ) external returns (string memory) {
 
         string memory svgHead = Composite.generateHead(settings);
 
+        string memory svgBody;
         uint256 layerCount = layerCounts[_id];
 
         for(uint i; i < layerCount; ++i){
-            //if item contract is this contract, refer to local storage for data
-            // if(){
+            Layer memory layer = layers[_id][i];
+            string memory svgLayer;
+            
+            if(IComp721(layer.item).isComponent()){
+                // if item is component, get component data
+                svgLayer = IComp721(layer.item).componentData();
+            }else if(layer.item == address(this)){
+                //if not component and if item contract is this contract, refer to local storage for data
+                svgLayer = this.svgData(layer.id);
+            }else{
+                // else call the contract to return the layer
+                svgLayer = IComp721(layer.item).svgData(layer.id);
+            }
 
-            // }
-
-            // else call the contract to return the layer
+            svgBody = string(abi.encodePacked(
+                svgBody,
+                svgLayer
+            ));
         }
 
-        return svgHead;
+        svgBody = string(abi.encodePacked(
+            svgHead,
+            svgBody,
+            '</svg>'
+        ));
+
+        return svgBody;
+    }
+
+
+    /**
+        Set the component SVG data of the token.
+
+        @param _svgData The svg data to set for this item.
+    */
+    function setComponent ( string memory _svgData ) external onlyOwner {
+        componentData = _svgData;
     }
 }
