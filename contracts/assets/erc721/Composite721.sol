@@ -4,7 +4,6 @@ pragma solidity ^0.8.11;
 import "./Tiny721.sol";
 import "../../meta/Composite.sol";
 import "../../meta/OnChainMeta.sol";
-import "../../interfaces/IComposite721.sol";
 
 error LayerOwnerNotSender();
 error NoLayersInComponent();
@@ -12,8 +11,6 @@ error RecursiveLayer();
 
 interface IComp721 {
     function getItemSettings () external view returns ( Composite.Settings memory );
-    function componentData ( ) external view returns ( string memory );
-    function isComponent ( ) external view returns ( bool );
     function ownerOf ( uint256 id ) external view returns ( address );
     function svgData ( uint256 id ) external view returns ( string memory );
 }
@@ -30,16 +27,22 @@ contract Composite721 is Tiny721, OnChainMeta {
         uint256 id;
     }
 
+    /// Boolean flag for component status
     bool public isComponent;
 
+    /// svgData if component
     string public componentData;
+
+    /// item id > number of image layers
+    mapping ( uint256 => uint256 ) public layerCounts;
     
     /// item id > z index > layer data
     mapping ( uint256 => mapping ( uint256 => Layer )) public layers;
 
-    /// item id > number of image layers
-    mapping ( uint256 => uint256 ) public layerCounts;
+    /// substrate > item id > in use
+    mapping ( address => mapping ( uint256 => bool)) public assignment;
 
+    event Assigned ( address component, uint256 cid, uint256 sid, bool status );
 
     /**
         A modifier to see if a caller is an approved administrator.
@@ -123,6 +126,33 @@ contract Composite721 is Tiny721, OnChainMeta {
 
         // save layer data
         layers[_id][zIndex] = _layer;
+
+        emit Assigned( _layer.item, _layer.id, _id, true );
+    }
+
+
+    /**
+        Token owners can use this function to remove a layer of a given item that 
+        they possess.
+
+        @param _itemId The ID of the token to modify.
+        @param _layerId The layer ID of the image to modify.
+        
+    */
+    function rmLayer (
+        uint256 _itemId,
+        uint256 _layerId
+    ) public onlyTokenOwner(_itemId) {
+        // require not in component status
+        if(isComponent){
+            revert NoLayersInComponent();
+        }
+
+        Layer memory layer = layers[_itemId][_layerId];
+
+        assignment[layer.item][layer.id] = false;
+
+        emit Assigned( layer.item, layer.id, _itemId, false );
     }
 
 
@@ -166,6 +196,9 @@ contract Composite721 is Tiny721, OnChainMeta {
     function svgData (
         uint256 _id 
     ) external view returns (string memory) {
+        if(isComponent){
+            return componentData;
+        }
 
         string memory svgHead = Composite.generateHead(settings);
 
@@ -176,10 +209,7 @@ contract Composite721 is Tiny721, OnChainMeta {
             Layer memory layer = layers[_id][i];
             string memory svgLayer;
             
-            if(IComp721(layer.item).isComponent()){
-                // if item is component, get component data
-                svgLayer = IComp721(layer.item).componentData();
-            }else if(layer.item == address(this)){
+            if(layer.item == address(this)){
                 //if not component and if item contract is this contract, refer to local storage for data
                 svgLayer = this.svgData(layer.id);
             }else{
@@ -210,5 +240,17 @@ contract Composite721 is Tiny721, OnChainMeta {
     */
     function setComponent ( string memory _svgData ) external onlyOwner {
         componentData = _svgData;
+    }
+
+
+    /**
+        Set the component assignment.
+
+        @param _substrate The contract where this item is assigned.
+        @param _id The id of the assigned item.
+        @param _status The boolean status of this assignment.
+    */
+    function assign ( address _substrate, uint256 _id, bool _status ) external onlyTokenOwner(_id) {
+        assignment[_substrate][_id] = _status;
     }
 }

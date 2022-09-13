@@ -4,9 +4,8 @@
 const { ethers } = require('hardhat');
 
 // These are the constants for the item contract.
-const ITEM_NAME = '#';
-const ITEM_SYMBOL = '#';
-const METADATA_URI = 'https://ipfs.io/ipfs/Qmeex8UEmcCYeSbXePnKjoobpXbQx9WfDDyrjqAVjfqkyQ';
+const ITEM_NAME = 'Substrate';
+const ITEM_SYMBOL = 'SUBSTR';
 const CAP = 555;
 
 async function logTransactionGas(transaction) {
@@ -35,13 +34,22 @@ async function main() {
   // Create a variable to track the total gas cost of deployment.
   let totalGasCost = ethers.utils.parseEther('0');
 
+  const SETTINGS = {
+    x: 0,
+    y: 0,
+    z: 0,
+    w: 1000,
+    h: 1000
+  }
+
   // Deploy the testing Composite721 item contract.
   let composite721 = await Composite721.connect(deployer.signer).deploy(
     ITEM_NAME,
     ITEM_SYMBOL,
-    METADATA_URI,
-    CAP
+    CAP,
+    SETTINGS
   );
+
   let composite721Deployed = await composite721.deployed();
   console.log('');
   console.log(`* Item collection deployed to: ${composite721.address}`);
@@ -51,8 +59,7 @@ async function main() {
 
   // Log a verification command.
   console.log(`[VERIFY] npx hardhat verify --network rinkeby \
-    ${composite721.address} "${ITEM_NAME}" "${ITEM_SYMBOL}" \
-    "${METADATA_URI}" ${CAP}`);
+    ${composite721.address} --constructor-args scripts/args/composite-args.js`);
 
   // Log the final gas cost of deployment.
   console.log('');

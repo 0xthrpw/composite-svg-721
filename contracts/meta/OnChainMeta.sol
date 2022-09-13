@@ -3,14 +3,11 @@ pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import 'base64-sol/base64.sol';
-import './NFTSVG.sol';
-import './Composite.sol';
 
 contract OnChainMeta {
     using Strings for uint256;
-    using Composite for Composite.Settings;
 
-    string public metaDescription = 'Components';
+    string public metaDescription = 'Composites';
 
     function _buildMeta(uint256 _tokenId, string memory _svgData) internal view returns (string memory) {
 
