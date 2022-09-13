@@ -11,11 +11,11 @@ error NoLayersInComponent();
 error RecursiveLayer();
 
 interface IComp721 {
-    function getItemSettings () external returns ( Composite.Settings memory );
-    function componentData ( ) external returns ( string memory );
-    function isComponent ( ) external returns ( bool );
-    function ownerOf ( uint256 id ) external returns ( address );
-    function svgData ( uint256 id ) external returns ( string memory );
+    function getItemSettings () external view returns ( Composite.Settings memory );
+    function componentData ( ) external view returns ( string memory );
+    function isComponent ( ) external view returns ( bool );
+    function ownerOf ( uint256 id ) external view returns ( address );
+    function svgData ( uint256 id ) external view returns ( string memory );
 }
 
 contract Composite721 is Tiny721, OnChainMeta {
@@ -137,8 +137,8 @@ contract Composite721 is Tiny721, OnChainMeta {
         uint256 _id
     ) external view virtual override returns (string memory) {
         if (!_exists(_id)) { revert URIQueryForNonexistentToken(); }
-
-        return _buildMeta(_id, address(0));
+        
+        return _buildMeta(_id, this.svgData(_id));
     }
 
 
@@ -165,7 +165,7 @@ contract Composite721 is Tiny721, OnChainMeta {
     */
     function svgData (
         uint256 _id 
-    ) external returns (string memory) {
+    ) external view returns (string memory) {
 
         string memory svgHead = Composite.generateHead(settings);
 
