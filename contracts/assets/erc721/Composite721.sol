@@ -40,8 +40,8 @@ contract Composite721 is Tiny721, OnChainMeta {
     /// svgData if component
     string public componentData;
 
-    /// substrate contract
-    address public substrate;
+    /// substrate contracts
+    mapping ( address => bool ) public substrates;
 
     /// item id > number of image layers
     mapping ( uint256 => uint256 ) public layerCounts;
@@ -55,7 +55,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         A modifier to see if a caller is an approved administrator.
     */
     modifier onlyTokenOwner (uint256 _id) {
-        if ( _msgSender() != this.ownerOf(_id) && _msgSender() != substrate) {
+        if ( _msgSender() != this.ownerOf(_id) && !substrates[_msgSender()]) {
             revert NotAnAdmin();
         }
         _;
@@ -78,7 +78,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         address _substrate
     ) Tiny721(_name, _symbol, _cap) {
         settings = _settings;
-        substrate = _substrate;
+        substrates[_substrate] = true;
     }
 
 
@@ -105,19 +105,21 @@ contract Composite721 is Tiny721, OnChainMeta {
         }
 
         // get the settings from the item contract
-        Composite.Settings memory itemSettings;
         address layerOwner; 
         bool layerAssigned;
+        uint256 zIndex;
 
         if(_layer.item == address(this)){
-            itemSettings = settings;
+            zIndex = layerCounts[_id];
             layerOwner = this.ownerOf(_layer.id);
             layerAssigned = assignment[_layer.id];
         }else{
             IComp721 compositeItem = IComp721(_layer.item);
             layerOwner = compositeItem.ownerOf(_layer.id);
-            itemSettings = compositeItem.settings();
+            Composite.Settings memory itemSettings = compositeItem.settings();
             layerAssigned = compositeItem.assignment(_layer.id);
+            zIndex = itemSettings.z;
+
         }
 
                 // require layer not in use
@@ -130,9 +132,7 @@ contract Composite721 is Tiny721, OnChainMeta {
             revert LayerOwnerNotSender();
         }
         
-        // specifically the z index so we know where to put the layer
-        uint256 zIndex = itemSettings.z;
-
+        
         // check for existing layer data
         Layer memory existing = layers[_id][zIndex];
 
@@ -306,5 +306,15 @@ contract Composite721 is Tiny721, OnChainMeta {
     */
     function setAssignment ( uint256 _id, bool _status ) public onlyTokenOwner(_id) {
         assignment[_id] = _status;
+    }
+
+    /**
+        Modify a substrate's status.
+
+        @param _substrate The address of the specified substrate.
+        @param _status The boolean status of this substrate.
+    */
+    function updateSubstrate ( address _substrate, bool _status ) public onlyOwner {
+        substrates[_substrate] = _status;
     }
 }

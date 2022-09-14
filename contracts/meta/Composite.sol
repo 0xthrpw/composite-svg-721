@@ -46,9 +46,4 @@ library Composite {
                 )
             );
     }
-
-    function generateBody(Settings memory settings) internal pure returns (string memory svg) {
-
-    }
-
 }

@@ -84,12 +84,11 @@ describe('Composite721', function() {
   
     });
 
-    // Confirm that ownership is correctly tracked.
-    describe('ownerOf', async function() {
+    describe('reversion', async function() {
         it('mint substrate', async function() {
 
-            let ownerSubstrate = await substrate721.ownerOf(1);
-            let ownerComponent = await composite721_1.ownerOf(1);
+            // let ownerSubstrate = await substrate721.ownerOf(1);
+            // let ownerComponent = await composite721_1.ownerOf(1);
 
             //console.log("owners", ownerSubstrate, ownerComponent);
             //console.log("contracts", substrate721.address, composite721_1.address);
@@ -116,8 +115,15 @@ describe('Composite721', function() {
             );
         });
 
-        it('reverts when adding assigned layer', async function() {
+        it('generates SVG from composite', async function() {
+            const svgDataBlue = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
+            const svgDataRed = '<svg width="400" height="110" x="200" y="200"><rect width="300" height="100" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" /></svg>';
 
+            await composite721_1.connect(alice.signer).setComponent(svgDataBlue);
+            await composite721_1.connect(alice.signer).toggleComponent(true);
+
+            await composite721_2.connect(alice.signer).setComponent(svgDataRed);
+            await composite721_2.connect(alice.signer).toggleComponent(true);
 
             await substrate721.connect(bob.signer).addLayer(
                 1, 
@@ -127,42 +133,10 @@ describe('Composite721', function() {
                 ]
             );
 
-            await expect(
-                substrate721.connect(bob.signer).addLayer(
-                    1, 
-                    [
-                        composite721_1.address,
-                        1
-                    ]
-                )
-            ).to.be.revertedWith('LayerInUse');
-
-        });
-
-        it('Components: reverts when adding assigned layer', async function() {
-            const svgData = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
-
-            await expect(
-                composite721_1.connect(bob.signer).setComponent(svgData)
-            ).to.be.revertedWith('Ownable: caller is not the owner');
-
-            await composite721_1.connect(alice.signer).setComponent(svgData);
-            await composite721_1.connect(alice.signer).toggleComponent(true);
-
-            // await expect(
-            //     composite721_1.connect(bob.signer).addLayer(
-            //         1, 
-            //         [
-            //             composite721_1.address,
-            //             1
-            //         ]
-            //     )
-            // ).to.be.revertedWith('RecursiveLayer');
-
             await substrate721.connect(bob.signer).addLayer(
                 1, 
                 [
-                    composite721_1.address,
+                    composite721_2.address,
                     1
                 ]
             );
@@ -181,20 +155,234 @@ describe('Composite721', function() {
 
             //console.log("decodedImage", imageString);
 
-            //fs.writeFileSync('test/token.svg', imageString);
-
-
-
-            // await substrate721.connect(bob.signer).addLayer(
-            //     1, 
-            //     [
-            //         composite721_1.address,
-            //         1
-            //     ]
-            // );
-
-
+            fs.writeFileSync('test/token.svg', imageString);
         });
+
+        it('reverts for an recursive layer assignment', async function() {
+            await expect(
+                composite721_1.connect(bob.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('RecursiveLayer');
+        });
+
+        it('reverts on non-owner setting component', async function() {
+            const svgData = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
+            await expect(
+                composite721_1.connect(bob.signer).setComponent(svgData)
+            ).to.be.revertedWith('Ownable: caller is not the owner');
+        });
+
+        it('reverts when adding assigned layer', async function() {
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+
+            await expect(
+                substrate721.connect(bob.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('LayerInUse');
+        });
+
+        it('reverts on adding layer if caller is not layer owner', async function() {
+            await composite721_1.connect(bob.signer).transferFrom(
+                bob.address,
+                carol.address,
+                1
+            );
+
+            await expect(
+                substrate721.connect(bob.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('LayerOwnerNotSender');
+        });
+
+        it('reverts for modifying layer to component', async function() {
+            const svgDataBlue = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
+            
+            await substrate721.connect(alice.signer).setComponent(svgDataBlue);
+            await substrate721.connect(alice.signer).toggleComponent(true);
+
+            await expect(
+                substrate721.connect(bob.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('NoLayersInComponent');
+
+            await expect(
+                substrate721.connect(bob.signer).rmLayer(
+                    1, 
+                    1
+                )
+            ).to.be.revertedWith('NoLayersInComponent');
+        });
+
+        it('reverts removing a layer that is not set', async function() {
+            await expect(
+                substrate721.connect(bob.signer).rmLayer(
+                    1, 
+                    1
+                )
+            ).to.be.revertedWith('ItemNotAssigned');
+        });
+
+        it('reverts removing a layer that is not owned by msg.sender', async function() {
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+
+            await composite721_1.connect(bob.signer).transferFrom(
+                bob.address,
+                carol.address,
+                1
+            );
+
+            await expect(
+                substrate721.connect(bob.signer).rmLayer(
+                    1, 
+                    1
+                )
+            ).to.be.revertedWith('LayerOwnerNotSender');
+        });
+
+        it('reverts when modifying layers if not token owner', async function() {
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_1.address,
+                    1
+                ]
+            );
+
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_2.address,
+                    1
+                ]
+            );
+
+            await expect(
+                substrate721.connect(carol.signer).rmLayer(
+                    1, 
+                    1
+                )
+            ).to.be.revertedWith('NotAnAdmin');
+
+            await expect(
+                substrate721.connect(carol.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('NotAnAdmin');
+        });
+
+        it('reverts for invalid substrate', async function() {
+            await composite721_1.connect(alice.signer).updateSubstrate(substrate721.address, false);
+
+            await expect(
+                substrate721.connect(bob.signer).addLayer(
+                    1, 
+                    [
+                        composite721_1.address,
+                        1
+                    ]
+                )
+            ).to.be.revertedWith('NotAnAdmin');
+        });
+
+        it('self referential layers', async function() {
+            // allow self as substrate
+            await substrate721.connect(alice.signer).updateSubstrate(substrate721.address, true);
+
+            await substrate721.mint(bob.address, 1);
+  
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    substrate721.address,
+                    2
+                ]
+            );
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    substrate721.address,
+                    2
+                ]
+            );
+
+            await substrate721.mint(bob.address, 1);
+  
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    substrate721.address,
+                    3
+                ]
+            );
+            
+
+            const layer10 = await substrate721.layers(1,0)
+            const layer11 = await substrate721.layers(1,1)
+            const layer12 = await substrate721.layers(1,2)
+            const layer20 = await substrate721.layers(2,0)
+            const layer21 = await substrate721.layers(2,1)
+
+            const layerCounts = await substrate721.layerCounts(1)
+
+            
+            console.log({
+                layerCounts: layerCounts,
+                layer10: layer10,
+                layer11: layer11,
+                layer12: layer12,
+                layer20: layer20,
+                layer21: layer21
+            });
+
+            await substrate721.connect(bob.signer).rmLayer(
+                1, 
+                0
+            );
+
+            const metadata_1 = await substrate721.connect(bob.signer).tokenURI(1);
+            const metadata_2 = await substrate721.connect(bob.signer).tokenURI(2);
+   
+        });
+
+        // it('reverts for an invalid token', async function() {
+            
+        // });
     
         // Because the zero address is a valid owner, we would like `ownerOf` to
         // revert on invalid tokens.
