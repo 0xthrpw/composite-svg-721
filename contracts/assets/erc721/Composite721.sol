@@ -34,11 +34,17 @@ contract Composite721 is Tiny721, OnChainMeta {
     /// Boolean flag for component status
     bool public isComponent;
 
+    /// svgData if component
+    string public componentData;
+
+    /// Count of global layers
+    uint256 public globalLayerCount;
+
     /// item id > in use
     mapping ( uint256 => bool) public assignment;
 
-    /// svgData if component
-    string public componentData;
+    /// layer id > globalLayer;
+    mapping ( uint256 => Layer ) public globalLayers;
 
     /// substrate contracts
     mapping ( address => bool ) public substrates;
@@ -69,6 +75,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         @param _symbol The ticker symbol of this item collection.
         @param _cap The maximum number of tokens that may be minted.
         @param _settings The image settings for this item
+        @param _substrate The initial substrate for this item (may be zero address)
     */
     constructor (
         string memory _name,
@@ -245,10 +252,60 @@ contract Composite721 is Tiny721, OnChainMeta {
         string memory svgHead = Composite.generateHead(settings);
 
         if(isComponent){
-            
             return componentData;
         }
 
+        string memory svgBody;
+
+        if(globalLayerCount > 0){
+            string memory baseLayer = _getGlobalLayer();
+ 
+            svgBody = string(abi.encodePacked(
+                baseLayer
+            ));
+        }
+
+        svgBody = _getUserLayers(_id);
+
+        svgBody = string(abi.encodePacked(
+            svgHead,
+            svgBody,
+            '</svg>'
+        ));
+
+        return svgBody;
+    }
+
+    /**
+        An internal helper for retrieving the base layer 
+    */
+    function _getGlobalLayer( ) internal view returns (string memory){
+        string memory svgBody;
+
+        for(uint i=1; i <= globalLayerCount; ++i){
+            Layer memory layer = globalLayers[i];
+            string memory svgLayer;
+            if(layer.item == address(this)){
+                svgLayer = this.svgData(layer.id);
+            }else{
+                svgLayer = IComp721(layer.item).svgData(layer.id);
+            }
+
+            svgBody =  string(abi.encodePacked(
+                svgBody,
+                svgLayer
+            ));
+        }
+        
+        return svgBody;        
+    }
+
+    /**
+        An internal helper for retrieving layers that token owners can change
+    
+        @param _id The ID of the token data getting got
+    */
+    function _getUserLayers( uint256 _id ) internal view returns (string memory){
         string memory svgBody;
         uint256 layerCount = layerCounts[_id];
 
@@ -278,15 +335,8 @@ contract Composite721 is Tiny721, OnChainMeta {
             ));
         }
 
-        svgBody = string(abi.encodePacked(
-            svgHead,
-            svgBody,
-            '</svg>'
-        ));
-
         return svgBody;
     }
-
 
     /**
         Set the component SVG data of the token.
@@ -316,5 +366,24 @@ contract Composite721 is Tiny721, OnChainMeta {
     */
     function updateSubstrate ( address _substrate, bool _status ) public onlyOwner {
         substrates[_substrate] = _status;
+    }    
+    
+    /**
+        Add a global layer that is displayed under all user layers
+
+        @param _layer The address and id of the specified item.
+    */
+    function updateGlobalLayer ( uint256 _layerId, Layer memory _layer ) public onlyOwner {
+        // check for existing layer data
+        Layer memory existing = globalLayers[_layerId];
+
+        // increment layer count if new layer
+        if(existing.item == address(0) && existing.id == uint(0)){
+            ++globalLayerCount;
+        }
+
+        globalLayers[_layerId] = _layer;
     }
+
+
 }

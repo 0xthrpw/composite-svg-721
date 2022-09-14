@@ -280,14 +280,6 @@ describe('Composite721', function() {
                 ]
             );
 
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
-                [
-                    composite721_2.address,
-                    1
-                ]
-            );
-
             await expect(
                 substrate721.connect(carol.signer).rmLayer(
                     1, 
@@ -333,13 +325,6 @@ describe('Composite721', function() {
                     2
                 ]
             );
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
-                [
-                    substrate721.address,
-                    2
-                ]
-            );
 
             await substrate721.mint(bob.address, 1);
   
@@ -350,7 +335,6 @@ describe('Composite721', function() {
                     3
                 ]
             );
-            
 
             const layer10 = await substrate721.layers(1,0)
             const layer11 = await substrate721.layers(1,1)
@@ -378,6 +362,17 @@ describe('Composite721', function() {
             const metadata_1 = await substrate721.connect(bob.signer).tokenURI(1);
             const metadata_2 = await substrate721.connect(bob.signer).tokenURI(2);
    
+        });
+
+        it('reverts for invalid substrate', async function() {
+
+            await substrate721.connect(alice.signer).updateGlobalLayer(
+                1,
+                [
+                    composite721_1.address, 
+                    1
+                ]
+            );
         });
 
         // it('reverts for an invalid token', async function() {
