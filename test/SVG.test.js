@@ -27,7 +27,7 @@ describe('SVG General', function() {
 
     // Deploy a fresh set of smart contracts, using these constants, for testing.
 
-    let substrate721, composite721_1, composite721_2;
+    let substrate721, composite721_1, composite721_2, composite721_3, composite721_4, composite721_5;
     beforeEach(async () => {
   
         // Deploy an instance of the Composite721 ERC-721 item contract.
@@ -38,7 +38,7 @@ describe('SVG General', function() {
             [
                 0,
                 0,
-                0,
+                1,
                 1000,
                 1000
             ],
@@ -74,23 +74,95 @@ describe('SVG General', function() {
             ],
             substrate721.address
         );
+                
         await composite721_2.deployed();
 
+        composite721_3 = await Composite721.connect(alice.signer).deploy(
+            "C3",
+            "C3",
+            300,
+            [
+                350,
+                350,
+                3,
+                300,
+                100
+            ],
+            substrate721.address
+        );
+        await composite721_3.deployed();
+
+        composite721_4 = await Composite721.connect(alice.signer).deploy(
+            "C4",
+            "C4",
+            300,
+            [
+                450,
+                450,
+                4,
+                400,
+                400
+            ],
+            substrate721.address
+        );
+        await composite721_4.deployed();
+
+        composite721_5 = await Composite721.connect(alice.signer).deploy(
+            "C5",
+            "C45",
+            300,
+            [
+                550,
+                550,
+                5,
+                500,
+                500
+            ],
+            substrate721.address
+        );
+        await composite721_5.deployed();
+
         await substrate721.mint(bob.address, 1);
-
         await composite721_1.mint(bob.address, 1);
-
         await composite721_2.mint(bob.address, 1);
+        await composite721_3.mint(bob.address, 1);
+        await composite721_4.mint(bob.address, 1);
+        await composite721_5.mint(bob.address, 1);
+
   
     });
 
     describe('reversion', async function() {
 
         it('generates SVG from composite', async function() {
-            const svgDataBlue = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
-            const svgDataRed = '<svg width="400" height="110" x="200" y="200"><rect width="300" height="100" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" /></svg>';
 
-            await composite721_1.connect(alice.signer).setComponent(svgDataBlue);
+
+
+
+            const svgGrid = `
+                <svg width="1000" height="1000">
+                    <rect width="4" height="800" x="100" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="200" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="300" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="400" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="500" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="600" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="700" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="800" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="4" height="800" x="900" y="100" style="fill:rgb(255,255,255);"/>
+
+                    <rect width="800" height="4" x="100" y="100" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="200" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="300" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="400" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="500" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="600" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="700" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="800" style="fill:rgb(255,255,255);"/>
+                    <rect width="800" height="4" x="100" y="900" style="fill:rgb(255,255,255);"/>
+                </svg>`;
+
+            await composite721_1.connect(alice.signer).setComponent(svgGrid);
             await composite721_1.connect(alice.signer).toggleComponent(true);
 
             await substrate721.connect(alice.signer).updateGlobalLayer(
@@ -101,24 +173,67 @@ describe('SVG General', function() {
                 ]
             );
 
+
+            const svgDataRed = '<rect width="96" height="96" x="104" y="104" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" />';
+
             await composite721_2.connect(alice.signer).setComponent(svgDataRed);
             await composite721_2.connect(alice.signer).toggleComponent(true);
 
-            await substrate721.connect(alice.signer).updateGlobalLayer(
-                2, 
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
                 [
                     composite721_2.address,
                     1
                 ]
             );
 
-            // await substrate721.connect(bob.signer).addLayer(
-            //     1, 
-            //     [
-            //         composite721_2.address,
-            //         1
-            //     ]
-            // );
+
+
+            //const sdata = await substrate721.svgData(1);
+            //console.log("sdata", sdata)
+
+            const svgDataGreen = '<rect width="96" height="96" x="204" y="204" style="fill:rgb(0,255,0);stroke-width:3;stroke:rgb(0,0,0)" />';
+
+            await composite721_3.connect(alice.signer).setComponent(svgDataGreen);
+            await composite721_3.connect(alice.signer).toggleComponent(true);
+            await composite721_3.connect(alice.signer).updateSubstrate(composite721_5.address, true);
+
+            await composite721_5.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_3.address,
+                    1
+                ]
+            );
+            
+            
+            //await composite721_4.mint(bob.address, 1);
+            const svgDataBlue = '<rect width="96" height="96" x="304" y="304" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(255,0,0)" />';
+
+            await composite721_4.connect(alice.signer).setComponent(svgDataBlue);
+            await composite721_4.connect(alice.signer).toggleComponent(true);
+            await composite721_4.connect(alice.signer).updateSubstrate(composite721_5.address, true);
+            await composite721_5.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_4.address,
+                    1
+                ]
+            );
+
+            //await composite721_5.connect(alice.signer).updateSubstrate(substrate721.address, true);
+            
+            await substrate721.connect(bob.signer).addLayer(
+                1, 
+                [
+                    composite721_5.address,
+                    1
+                ]
+            );
+            
+
+            const globalLayerCount = await substrate721.globalLayerCount();
+            //console.log("globalLayerCount", globalLayerCount);
 
             const metadata = await substrate721.connect(bob.signer).tokenURI(1);
             const trimmedMeta = metadata.substring(29);
@@ -134,7 +249,7 @@ describe('SVG General', function() {
 
             //console.log("decodedImage", imageString);
 
-            fs.writeFileSync('test/token.svg', imageString);
+            fs.writeFileSync('test/svgflight.svg', imageString);
         });
     });
 });

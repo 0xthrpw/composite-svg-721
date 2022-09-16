@@ -103,7 +103,7 @@ describe('Composite721', function() {
 
             await substrate721.connect(bob.signer).rmLayer(
                 1,
-                1  
+                0  
             );
 
             await substrate721.connect(bob.signer).addLayer(
@@ -266,7 +266,7 @@ describe('Composite721', function() {
             await expect(
                 substrate721.connect(bob.signer).rmLayer(
                     1, 
-                    1
+                    0
                 )
             ).to.be.revertedWith('LayerOwnerNotSender');
         });
@@ -313,9 +313,6 @@ describe('Composite721', function() {
         });
 
         it('self referential layers', async function() {
-            // allow self as substrate
-            await substrate721.connect(alice.signer).updateSubstrate(substrate721.address, true);
-
             await substrate721.mint(bob.address, 1);
   
             await substrate721.connect(bob.signer).addLayer(
@@ -327,14 +324,6 @@ describe('Composite721', function() {
             );
 
             await substrate721.mint(bob.address, 1);
-  
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
-                [
-                    substrate721.address,
-                    3
-                ]
-            );
 
             const layer10 = await substrate721.layers(1,0)
             const layer11 = await substrate721.layers(1,1)
@@ -345,14 +334,14 @@ describe('Composite721', function() {
             const layerCounts = await substrate721.layerCounts(1)
 
             
-            console.log({
-                layerCounts: layerCounts,
-                layer10: layer10,
-                layer11: layer11,
-                layer12: layer12,
-                layer20: layer20,
-                layer21: layer21
-            });
+            // console.log({
+            //     layerCounts: layerCounts,
+            //     layer10: layer10,
+            //     layer11: layer11,
+            //     layer12: layer12,
+            //     layer20: layer20,
+            //     layer21: layer21
+            // });
 
             await substrate721.connect(bob.signer).rmLayer(
                 1, 
@@ -360,7 +349,7 @@ describe('Composite721', function() {
             );
 
             const metadata_1 = await substrate721.connect(bob.signer).tokenURI(1);
-            const metadata_2 = await substrate721.connect(bob.signer).tokenURI(2);
+            //const metadata_2 = await substrate721.connect(bob.signer).tokenURI(2);
    
         });
 
@@ -377,18 +366,6 @@ describe('Composite721', function() {
 
         // it('reverts for an invalid token', async function() {
             
-        // });
-    
-        // Because the zero address is a valid owner, we would like `ownerOf` to
-        // revert on invalid tokens.
-
-        // it('reverts for an invalid token', async function() {
-        //     await expect(
-        //     tiny721.connect(alice.signer).ownerOf(0)
-        //     ).to.be.revertedWith('OwnerQueryForNonexistentToken');
-        //     await expect(
-        //     tiny721.connect(alice.signer).ownerOf(7)
-        //     ).to.be.revertedWith('OwnerQueryForNonexistentToken');
         // });
     });
 });

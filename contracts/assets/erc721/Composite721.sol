@@ -86,6 +86,7 @@ contract Composite721 is Tiny721, OnChainMeta {
     ) Tiny721(_name, _symbol, _cap) {
         settings = _settings;
         substrates[_substrate] = true;
+        substrates[address(this)] = true;
     }
 
 
@@ -114,22 +115,18 @@ contract Composite721 is Tiny721, OnChainMeta {
         // get the settings from the item contract
         address layerOwner; 
         bool layerAssigned;
-        uint256 zIndex;
+        uint256 zIndex = layerCounts[_id];
 
         if(_layer.item == address(this)){
-            zIndex = layerCounts[_id];
             layerOwner = this.ownerOf(_layer.id);
             layerAssigned = assignment[_layer.id];
         }else{
             IComp721 compositeItem = IComp721(_layer.item);
             layerOwner = compositeItem.ownerOf(_layer.id);
-            Composite.Settings memory itemSettings = compositeItem.settings();
             layerAssigned = compositeItem.assignment(_layer.id);
-            zIndex = itemSettings.z;
-
         }
 
-                // require layer not in use
+        // require layer not in use
         if(layerAssigned){
             revert LayerInUse();
         }
@@ -258,18 +255,40 @@ contract Composite721 is Tiny721, OnChainMeta {
         string memory svgBody;
 
         if(globalLayerCount > 0){
-            string memory baseLayer = _getGlobalLayer();
- 
-            svgBody = string(abi.encodePacked(
-                baseLayer
-            ));
+            svgBody = _getGlobalLayer();
         }
 
-        svgBody = _getUserLayers(_id);
+        uint256 layerCount = layerCounts[_id];
+        for(uint i=0; i < layerCount; ++i){
+            Layer memory layer = layers[_id][i];
+            string memory svgLayer;
+            address layerOwner;
+
+            if(layer.item == address(this)){
+                //if not component and if item contract is this contract, refer to local storage for data
+                svgLayer = this.svgData(layer.id);
+                layerOwner = this.ownerOf(layer.id);
+            }else{
+                // else call the contract to return the layer
+                svgLayer = IComp721(layer.item).svgData(layer.id);
+                layerOwner = IComp721(layer.item).ownerOf(layer.id);
+            }
+
+            // if layer/component owner is not substrate owner, ignore this layer
+            if(layerOwner != this.ownerOf(_id)){
+                continue;
+            }
+
+            svgBody = string(abi.encodePacked(
+                svgBody,
+                svgLayer
+            ));
+        }
 
         svgBody = string(abi.encodePacked(
             svgHead,
             svgBody,
+            _getUserLayers(_id),
             '</svg>'
         ));
 
@@ -309,7 +328,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         string memory svgBody;
         uint256 layerCount = layerCounts[_id];
 
-        for(uint i=1; i <= layerCount; ++i){
+        for(uint i; i < layerCount; ++i){
             Layer memory layer = layers[_id][i];
             string memory svgLayer;
             address layerOwner;
