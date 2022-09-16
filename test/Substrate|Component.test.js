@@ -35,13 +35,6 @@ describe('Composite721', function() {
             "Substrate",
             "SUBSTR",
             555,
-            [
-                0,
-                0,
-                0,
-                1000,
-                1000
-            ],
             ethers.constants.AddressZero
         );
         await substrate721.deployed();
@@ -50,13 +43,6 @@ describe('Composite721', function() {
             "C1",
             "C1",
             100,
-            [
-                250,
-                250,
-                1,
-                500,
-                500
-            ],
             substrate721.address
         );
         await composite721_1.deployed();
@@ -65,13 +51,6 @@ describe('Composite721', function() {
             "C2",
             "C2",
             200,
-            [
-                250,
-                250,
-                2,
-                100,
-                100
-            ],
             substrate721.address
         );
         await composite721_2.deployed();

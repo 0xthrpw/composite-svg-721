@@ -35,13 +35,6 @@ describe('SVG General', function() {
             "Substrate",
             "SUBSTR",
             555,
-            [
-                0,
-                0,
-                1,
-                1000,
-                1000
-            ],
             ethers.constants.AddressZero
         );
         await substrate721.deployed();
@@ -50,13 +43,6 @@ describe('SVG General', function() {
             "C1",
             "C1",
             100,
-            [
-                250,
-                250,
-                1,
-                500,
-                500
-            ],
             substrate721.address
         );
         await composite721_1.deployed();
@@ -65,13 +51,6 @@ describe('SVG General', function() {
             "C2",
             "C2",
             200,
-            [
-                250,
-                250,
-                2,
-                100,
-                100
-            ],
             substrate721.address
         );
                 
@@ -81,13 +60,6 @@ describe('SVG General', function() {
             "C3",
             "C3",
             300,
-            [
-                350,
-                350,
-                3,
-                300,
-                100
-            ],
             substrate721.address
         );
         await composite721_3.deployed();
@@ -96,13 +68,6 @@ describe('SVG General', function() {
             "C4",
             "C4",
             300,
-            [
-                450,
-                450,
-                4,
-                400,
-                400
-            ],
             substrate721.address
         );
         await composite721_4.deployed();
@@ -111,13 +76,6 @@ describe('SVG General', function() {
             "C5",
             "C45",
             300,
-            [
-                550,
-                550,
-                5,
-                500,
-                500
-            ],
             substrate721.address
         );
         await composite721_5.deployed();
@@ -140,7 +98,8 @@ describe('SVG General', function() {
 
 
             const svgGrid = `
-                <svg width="1000" height="1000">
+                <svg width="1000" height="1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <rect width="1000" height="1000" x="0" y="0" style="fill:rgb(0,0,0);"/>
                     <rect width="4" height="800" x="100" y="100" style="fill:rgb(255,255,255);"/>
                     <rect width="4" height="800" x="200" y="100" style="fill:rgb(255,255,255);"/>
                     <rect width="4" height="800" x="300" y="100" style="fill:rgb(255,255,255);"/>
@@ -160,7 +119,7 @@ describe('SVG General', function() {
                     <rect width="800" height="4" x="100" y="700" style="fill:rgb(255,255,255);"/>
                     <rect width="800" height="4" x="100" y="800" style="fill:rgb(255,255,255);"/>
                     <rect width="800" height="4" x="100" y="900" style="fill:rgb(255,255,255);"/>
-                </svg>`;
+                `;
 
             await composite721_1.connect(alice.signer).setComponent(svgGrid);
             await composite721_1.connect(alice.signer).toggleComponent(true);
@@ -174,7 +133,7 @@ describe('SVG General', function() {
             );
 
 
-            const svgDataRed = '<rect width="96" height="96" x="104" y="104" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" />';
+            const svgDataRed = '<svg><rect width="96" height="96" x="104" y="104" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" /></svg>';
 
             await composite721_2.connect(alice.signer).setComponent(svgDataRed);
             await composite721_2.connect(alice.signer).toggleComponent(true);
@@ -192,7 +151,7 @@ describe('SVG General', function() {
             //const sdata = await substrate721.svgData(1);
             //console.log("sdata", sdata)
 
-            const svgDataGreen = '<rect width="96" height="96" x="204" y="204" style="fill:rgb(0,255,0);stroke-width:3;stroke:rgb(0,0,0)" />';
+            const svgDataGreen = '<svg><rect width="96" height="96" x="204" y="204" style="fill:rgb(0,255,0);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
 
             await composite721_3.connect(alice.signer).setComponent(svgDataGreen);
             await composite721_3.connect(alice.signer).toggleComponent(true);
@@ -208,7 +167,7 @@ describe('SVG General', function() {
             
             
             //await composite721_4.mint(bob.address, 1);
-            const svgDataBlue = '<rect width="96" height="96" x="304" y="304" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(255,0,0)" />';
+            const svgDataBlue = '<svg><rect width="96" height="96" x="304" y="304" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(255,0,0)" /></svg>';
 
             await composite721_4.connect(alice.signer).setComponent(svgDataBlue);
             await composite721_4.connect(alice.signer).toggleComponent(true);

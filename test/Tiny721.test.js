@@ -10,9 +10,9 @@ const fs = require('fs');
   Describe the contract testing suite, retrieve testing wallets, and create
   contract factories from the artifacts we are testing.
 */
-describe('Composite721', function() {
+describe('Tiny721', function() {
   let alice, bob, carol, dev;
-  let Composite721, MockERC721Receiver;
+  let Tiny721, MockERC721Receiver;
   before(async () => {
     const signers = await ethers.getSigners();
     const addresses = await Promise.all(signers.map(async signer => signer.getAddress()));
@@ -21,7 +21,7 @@ describe('Composite721', function() {
     carol = { provider: signers[2].provider, signer: signers[2], address: addresses[2] };
     dev = { provider: signers[3].provider, signer: signers[3], address: addresses[3] };
 
-    Composite721 = await ethers.getContractFactory('Composite721');
+    Tiny721 = await ethers.getContractFactory('Tiny721');
     MockERC721Receiver = await ethers.getContractFactory('MockERC721Receiver');
   });
 
@@ -30,17 +30,16 @@ describe('Composite721', function() {
   const SYMBOL = 'TEST';
 
   const CAP = 10000;
-  let composite721, goodReceiver, badReceiver;
+  let tiny721, goodReceiver, badReceiver;
   beforeEach(async () => {
 
-    // Deploy an instance of the Composite721 ERC-721 item contract.
-    composite721 = await Composite721.connect(alice.signer).deploy(
+    // Deploy an instance of the Tiny721 ERC-721 item contract.
+    tiny721 = await Tiny721.connect(alice.signer).deploy(
       NAME,
       SYMBOL,
-      CAP,
-      ethers.constants.AddressZero
+      CAP
     );
-    await composite721.deployed();
+    await tiny721.deployed();
 
     // Deploy a mock ERC-721 item receiving contract that can receive items.
     goodReceiver = await MockERC721Receiver.connect(alice.signer).deploy(true);
@@ -54,7 +53,7 @@ describe('Composite721', function() {
   // Confirm that the item's total supply is zero before any minting.
   context('with no minted tokens', async function() {
     it('has 0 totalSupply', async function() {
-      const supply = await composite721.totalSupply();
+      const supply = await tiny721.totalSupply();
       supply.should.be.equal(0);
     });
   });
@@ -62,23 +61,23 @@ describe('Composite721', function() {
   // Perform those tests utilizing minted tokens.
   context('with minted tokens', async function() {
     beforeEach(async function() {
-      await composite721.connect(alice.signer).mint(alice.address, 1);
-      await composite721.connect(alice.signer).mint(bob.address, 2);
-      await composite721.connect(alice.signer).mint(carol.address, 3);
+      await tiny721.connect(alice.signer).mint(alice.address, 1);
+      await tiny721.connect(alice.signer).mint(bob.address, 2);
+      await tiny721.connect(alice.signer).mint(carol.address, 3);
     });
 
     // Confirm that we can retrieve balance of holder tokens.
     describe('balanceOf', async function() {
       it('returns the amount for a given address', async function() {
-        let aliceBalance = await composite721.connect(alice.signer).balanceOf(
+        let aliceBalance = await tiny721.connect(alice.signer).balanceOf(
           alice.address);
-        let bobBalance = await composite721.connect(alice.signer).balanceOf(
+        let bobBalance = await tiny721.connect(alice.signer).balanceOf(
           bob.address);
-        let carolBalance = await composite721.connect(alice.signer).balanceOf(
+        let carolBalance = await tiny721.connect(alice.signer).balanceOf(
           carol.address);
-        let devBalance = await composite721.connect(alice.signer).balanceOf(
+        let devBalance = await tiny721.connect(alice.signer).balanceOf(
           dev.address);
-        let zeroBalance = await composite721.connect(alice.signer).balanceOf(
+        let zeroBalance = await tiny721.connect(alice.signer).balanceOf(
           ethers.constants.AddressZero);
         aliceBalance.should.be.equal(1);
         bobBalance.should.be.equal(2);
@@ -91,11 +90,11 @@ describe('Composite721', function() {
     // Confirm that ownership is correctly tracked.
     describe('ownerOf', async function() {
       it('returns the right owner', async function() {
-        let ownerOne = await composite721.connect(alice.signer).ownerOf(1);
+        let ownerOne = await tiny721.connect(alice.signer).ownerOf(1);
         ownerOne.should.be.equal(alice.address);
-        let ownerTwo = await composite721.connect(alice.signer).ownerOf(2);
+        let ownerTwo = await tiny721.connect(alice.signer).ownerOf(2);
         ownerTwo.should.be.equal(bob.address);
-        let ownerFour = await composite721.connect(alice.signer).ownerOf(4);
+        let ownerFour = await tiny721.connect(alice.signer).ownerOf(4);
         ownerFour.should.be.equal(carol.address);
       });
 
@@ -103,10 +102,10 @@ describe('Composite721', function() {
       // revert on invalid tokens.
       it('reverts for an invalid token', async function() {
         await expect(
-          composite721.connect(alice.signer).ownerOf(0)
+          tiny721.connect(alice.signer).ownerOf(0)
         ).to.be.revertedWith('OwnerQueryForNonexistentToken');
         await expect(
-          composite721.connect(alice.signer).ownerOf(7)
+          tiny721.connect(alice.signer).ownerOf(7)
         ).to.be.revertedWith('OwnerQueryForNonexistentToken');
       });
     });
@@ -114,28 +113,28 @@ describe('Composite721', function() {
     // Confirm that token transfer approvals are correct.
     describe('approve', async function() {
       it('sets approval for the target address', async function() {
-        await composite721.connect(alice.signer).approve(bob.address, 1);
-        const approval = await composite721.connect(alice.signer).getApproved(1);
+        await tiny721.connect(alice.signer).approve(bob.address, 1);
+        const approval = await tiny721.connect(alice.signer).getApproved(1);
         approval.should.be.equal(bob.address);
-        let ownerOne = await composite721.connect(alice.signer).ownerOf(1);
+        let ownerOne = await tiny721.connect(alice.signer).ownerOf(1);
         ownerOne.should.be.equal(alice.address);
-        await composite721.connect(bob.signer).transferFrom(alice.address,
+        await tiny721.connect(bob.signer).transferFrom(alice.address,
           bob.address, 1);
-        ownerOne = await composite721.connect(alice.signer).ownerOf(1);
+        ownerOne = await tiny721.connect(alice.signer).ownerOf(1);
         ownerOne.should.be.equal(bob.address);
       });
 
       // Do not allow token approvals to be set by non-owners.
       it('rejects an unapproved caller', async function() {
         await expect(
-          composite721.connect(bob.signer).approve(bob.address, 1)
+          tiny721.connect(bob.signer).approve(bob.address, 1)
         ).to.be.revertedWith('ApprovalCallerNotOwnerNorApproved');
       });
 
       // Do not allow transfer approvals on token IDs that do not exist.
       it('does not get approved for invalid tokens', async function() {
         await expect(
-          composite721.connect(alice.signer).getApproved(7)
+          tiny721.connect(alice.signer).getApproved(7)
         ).to.be.revertedWith('ApprovalQueryForNonexistentToken');
       });
     });
@@ -143,19 +142,19 @@ describe('Composite721', function() {
     // Confirm that operator approval can be set correctly.
     describe('setApprovalForAll', async function() {
       it('sets approval for all properly', async function() {
-        const approvalTx = await composite721.connect(alice.signer)
+        const approvalTx = await tiny721.connect(alice.signer)
           .setApprovalForAll(bob.address, true);
         await expect(approvalTx)
-          .to.emit(composite721, 'ApprovalForAll')
+          .to.emit(tiny721, 'ApprovalForAll')
           .withArgs(alice.address, bob.address, true);
-        let isBobApproved = await composite721.isApprovedForAll(alice.address,
+        let isBobApproved = await tiny721.isApprovedForAll(alice.address,
           bob.address);
         isBobApproved.should.be.equal(true);
-        let ownerOne = await composite721.connect(alice.signer).ownerOf(1);
+        let ownerOne = await tiny721.connect(alice.signer).ownerOf(1);
         ownerOne.should.be.equal(alice.address);
-        await composite721.connect(bob.signer).transferFrom(alice.address,
+        await tiny721.connect(bob.signer).transferFrom(alice.address,
           bob.address, 1);
-        ownerOne = await composite721.connect(alice.signer).ownerOf(1);
+        ownerOne = await tiny721.connect(alice.signer).ownerOf(1);
         ownerOne.should.be.equal(bob.address);
       });
     });
@@ -170,7 +169,7 @@ describe('Composite721', function() {
       const testTransfer = async function(functionSignature) {
         let args, transfer;
         beforeEach(async function() {
-          await composite721.connect(alice.signer).setApprovalForAll(carol.address,
+          await tiny721.connect(alice.signer).setApprovalForAll(carol.address,
             true);
           const argumentsLookup = {
             'transferFrom': [alice.address, bob.address, 1],
@@ -182,15 +181,15 @@ describe('Composite721', function() {
             ]
           };
           args = argumentsLookup[functionSignature];
-          transfer = await composite721.connect(alice.signer)[functionSignature]
+          transfer = await tiny721.connect(alice.signer)[functionSignature]
             .apply(this, args);
         });
 
         // Confirm that balances appropriately reflect the transfer happening.
         it('adjusts owners balances', async function() {
-          let aliceBalance = await composite721.connect(alice.signer)
+          let aliceBalance = await tiny721.connect(alice.signer)
             .balanceOf(alice.address);
-          let bobBalance = await composite721.connect(alice.signer)
+          let bobBalance = await tiny721.connect(alice.signer)
             .balanceOf(bob.address);
           aliceBalance.should.be.equal(0);
           bobBalance.should.be.equal(3);
@@ -198,13 +197,13 @@ describe('Composite721', function() {
 
         // Confirm that the token ownership changes during transer.
         it('transfers the ownership of the given token ID to the given address', async function() {
-          let tokenOwner = await composite721.connect(alice.signer).ownerOf(1);
+          let tokenOwner = await tiny721.connect(alice.signer).ownerOf(1);
           tokenOwner.should.be.equal(bob.address);
         });
 
         // Any token approval that ALice may have set should be cleared.
         it('clears the approval for the token ID', async function() {
-          let tokenApproval = await composite721.connect(alice.signer)
+          let tokenApproval = await tiny721.connect(alice.signer)
             .getApproved(1);
           tokenApproval.should.be.equal(ethers.constants.AddressZero);
         });
@@ -212,14 +211,14 @@ describe('Composite721', function() {
         // Confirm that the appropriate Transfer event is emitted.
         it('emits the correct Transfer event', async function() {
           await expect(transfer).to
-            .emit(composite721, 'Transfer')
+            .emit(tiny721, 'Transfer')
             .withArgs(alice.address, bob.address, 1);
         });
 
         // Confirm that the appropriate Approval event is emitted.
         it('emits the correct Approval event', async function() {
           await expect(transfer).to
-            .emit(composite721, 'Approval')
+            .emit(tiny721, 'Approval')
             .withArgs(alice.address, ethers.constants.AddressZero, 1);
         });
 
@@ -229,7 +228,7 @@ describe('Composite721', function() {
         */
         it('rejects unapproved transfer', async function() {
           await expect(
-            composite721.connect(alice.signer)[functionSignature]
+            tiny721.connect(alice.signer)[functionSignature]
               .apply(this, args)
           ).to.be.revertedWith('TransferCallerNotOwnerNorApproved');
         });
@@ -241,7 +240,7 @@ describe('Composite721', function() {
         it('reject transfer from operator for unowned id', async function() {
           args[2] += 1;
           await expect(
-            composite721.connect(carol.signer)[functionSignature]
+            tiny721.connect(carol.signer)[functionSignature]
               .apply(this, args)
           ).to.be.revertedWith('TransferCallerNotOwnerNorApproved');
         });
@@ -249,7 +248,7 @@ describe('Composite721', function() {
         // Reject transfers of your own tokens from invalid owners.
         it('rejects transfer from incorrect owner', async function() {
           await expect(
-            composite721.connect(bob.signer)[functionSignature]
+            tiny721.connect(bob.signer)[functionSignature]
               .apply(this, args)
           ).to.be.revertedWith('TransferFromIncorrectOwner');
         });
@@ -263,7 +262,7 @@ describe('Composite721', function() {
           args[1] = ethers.constants.AddressZero;
           args[2] = 2;
           await expect(
-            composite721.connect(bob.signer)[functionSignature].apply(this, args)
+            tiny721.connect(bob.signer)[functionSignature].apply(this, args)
           ).to.be.revertedWith('TransferToZeroAddress');
         });
 
@@ -276,7 +275,7 @@ describe('Composite721', function() {
             args[0] = bob.address;
             args[1] = goodReceiver.address;
             args[2] = 2;
-            let safeTransfer = await composite721.connect(bob.signer)[functionSignature].apply(this, args);
+            let safeTransfer = await tiny721.connect(bob.signer)[functionSignature].apply(this, args);
             await expect(safeTransfer).to
               .emit(goodReceiver, 'Received')
               .withArgs(bob.address, bob.address, 2, '0x');
@@ -288,7 +287,7 @@ describe('Composite721', function() {
             args[1] = badReceiver.address;
             args[2] = 2;
             await expect(
-              composite721.connect(bob.signer)[functionSignature].apply(this, args)
+              tiny721.connect(bob.signer)[functionSignature].apply(this, args)
             ).to.be.revertedWith('TransferToNonERC721ReceiverImplementer');
           });
         }
@@ -314,61 +313,61 @@ describe('Composite721', function() {
   // Test minting tokens.
   context('mint', async function() {
     it('successfully mints a single token', async function() {
-      const mint = await composite721.mint(alice.address, 1);
+      const mint = await tiny721.mint(alice.address, 1);
       await expect(mint).to
-        .emit(composite721, 'Transfer')
+        .emit(tiny721, 'Transfer')
         .withArgs(ethers.constants.AddressZero, alice.address, 1);
       await expect(mint).to.not
         .emit(goodReceiver, 'Received');
-      let newOwner = await composite721.ownerOf(1);
+      let newOwner = await tiny721.ownerOf(1);
       newOwner.should.be.equal(alice.address);
     });
 
     it('successfully mints multiple tokens', async function() {
-      const mint = await composite721.mint(alice.address, 5);
+      const mint = await tiny721.mint(alice.address, 5);
       for (let tokenId = 0; tokenId < 5; tokenId++) {
         await expect(mint).to
-          .emit(composite721, 'Transfer')
+          .emit(tiny721, 'Transfer')
           .withArgs(ethers.constants.AddressZero, alice.address, 1 + tokenId);
         await expect(mint).to.not
           .emit(goodReceiver, 'Received');
-        let newOwner = await composite721.ownerOf(1 + tokenId);
+        let newOwner = await tiny721.ownerOf(1 + tokenId);
         newOwner.should.be.equal(alice.address);
       }
     });
 
     it('does not revert for non-receivers', async function() {
-      await composite721.mint(composite721.address, 1);
-      let ownerOne = await composite721.ownerOf(1);
-      ownerOne.should.be.equal(composite721.address);
+      await tiny721.mint(tiny721.address, 1);
+      let ownerOne = await tiny721.ownerOf(1);
+      ownerOne.should.be.equal(tiny721.address);
     });
 
     it('rejects mints to the zero address', async function() {
       await expect(
-        composite721.connect(alice.signer).mint(ethers.constants.AddressZero, 1)
+        tiny721.connect(alice.signer).mint(ethers.constants.AddressZero, 1)
       ).to.be.revertedWith('MintToZeroAddress');
     });
 
     it('requires quantity to be greater than 0', async function() {
       await expect(
-        composite721.connect(alice.signer).mint(alice.address, 0)
+        tiny721.connect(alice.signer).mint(alice.address, 0)
       ).to.be.revertedWith('MintZeroQuantity');
     });
   });
 
   context('make a file', async function() {
     it('successfully mints a single token', async function() {
-      const mint = await composite721.mint(alice.address, 1);
+      const mint = await tiny721.mint(alice.address, 1);
       await expect(mint).to
-        .emit(composite721, 'Transfer')
+        .emit(tiny721, 'Transfer')
         .withArgs(ethers.constants.AddressZero, alice.address, 1);
       await expect(mint).to.not
         .emit(goodReceiver, 'Received');
-      let newOwner = await composite721.ownerOf(1);
+      let newOwner = await tiny721.ownerOf(1);
       newOwner.should.be.equal(alice.address);
 
       //
-      // let metadata = await composite721.tokenURI(1);
+      // let metadata = await tiny721.tokenURI(1);
       // let data = metadata.substring(29);
       // let buff = new Buffer.from(data, 'base64');
       //

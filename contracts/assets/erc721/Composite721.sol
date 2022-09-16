@@ -2,7 +2,6 @@
 pragma solidity ^0.8.11;
 
 import "./Tiny721.sol";
-import "../../meta/Composite.sol";
 import "../../meta/OnChainMeta.sol";
 
 error ItemNotAssigned();
@@ -13,18 +12,12 @@ error RecursiveLayer();
 
 interface IComp721 {
     function assignment ( uint256 id ) external view returns ( bool );
-    function settings () external view returns ( Composite.Settings memory );
     function ownerOf ( uint256 id ) external view returns ( address );
     function svgData ( uint256 id ) external view returns ( string memory );
     function setAssignment ( uint256 _id, bool _status ) external;
 }
 
 contract Composite721 is Tiny721, OnChainMeta {
-    using Composite for Composite.Settings;
-
-    /// The image settings for this item
-    Composite.Settings public settings;
-
     /// The item contract and item id that comprise this layer
     struct Layer {
         address item;
@@ -74,17 +67,14 @@ contract Composite721 is Tiny721, OnChainMeta {
         @param _name The name to assign to this item collection contract.
         @param _symbol The ticker symbol of this item collection.
         @param _cap The maximum number of tokens that may be minted.
-        @param _settings The image settings for this item
         @param _substrate The initial substrate for this item (may be zero address)
     */
     constructor (
         string memory _name,
         string memory _symbol,
         uint256 _cap,
-        Composite.Settings memory _settings,
         address _substrate
     ) Tiny721(_name, _symbol, _cap) {
-        settings = _settings;
         substrates[_substrate] = true;
         substrates[address(this)] = true;
     }
@@ -112,7 +102,7 @@ contract Composite721 is Tiny721, OnChainMeta {
             revert NoLayersInComponent();
         }
 
-        // get the settings from the item contract
+        // get the layer from the item contract
         address layerOwner; 
         bool layerAssigned;
         uint256 zIndex = layerCounts[_id];
@@ -218,7 +208,8 @@ contract Composite721 is Tiny721, OnChainMeta {
     ) external view virtual override returns (string memory) {
         if (!_exists(_id)) { revert URIQueryForNonexistentToken(); }
         
-        return _buildMeta(_id, this.svgData(_id));
+        string memory _svgData = string(abi.encodePacked(this.svgData(_id), '</svg>'));
+        return _buildMeta(_id, _svgData);
     }
 
 
@@ -246,8 +237,6 @@ contract Composite721 is Tiny721, OnChainMeta {
     function svgData (
         uint256 _id 
     ) external view returns (string memory) {
-        string memory svgHead = Composite.generateHead(settings);
-
         if(isComponent){
             return componentData;
         }
@@ -258,38 +247,37 @@ contract Composite721 is Tiny721, OnChainMeta {
             svgBody = _getGlobalLayer();
         }
 
-        uint256 layerCount = layerCounts[_id];
-        for(uint i=0; i < layerCount; ++i){
-            Layer memory layer = layers[_id][i];
-            string memory svgLayer;
-            address layerOwner;
+        // uint256 layerCount = layerCounts[_id];
+        // for(uint i=0; i < layerCount; ++i){
+        //     Layer memory layer = layers[_id][i];
+        //     string memory svgLayer;
+        //     address layerOwner;
 
-            if(layer.item == address(this)){
-                //if not component and if item contract is this contract, refer to local storage for data
-                svgLayer = this.svgData(layer.id);
-                layerOwner = this.ownerOf(layer.id);
-            }else{
-                // else call the contract to return the layer
-                svgLayer = IComp721(layer.item).svgData(layer.id);
-                layerOwner = IComp721(layer.item).ownerOf(layer.id);
-            }
+        //     if(layer.item == address(this)){
+        //         //if not component and if item contract is this contract, refer to local storage for data
+        //         svgLayer = this.svgData(layer.id);
+        //         layerOwner = this.ownerOf(layer.id);
+        //     }else{
+        //         // else call the contract to return the layer
+        //         svgLayer = IComp721(layer.item).svgData(layer.id);
+        //         layerOwner = IComp721(layer.item).ownerOf(layer.id);
+        //     }
 
-            // if layer/component owner is not substrate owner, ignore this layer
-            if(layerOwner != this.ownerOf(_id)){
-                continue;
-            }
+        //     // if layer/component owner is not substrate owner, ignore this layer
+        //     if(layerOwner != this.ownerOf(_id)){
+        //         continue;
+        //     }
 
-            svgBody = string(abi.encodePacked(
-                svgBody,
-                svgLayer
-            ));
-        }
+        //     svgBody = string(abi.encodePacked(
+        //         svgBody,
+        //         svgLayer
+        //     ));
+        // }
 
         svgBody = string(abi.encodePacked(
-            svgHead,
+            //'<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
             svgBody,
-            _getUserLayers(_id),
-            '</svg>'
+            _getUserLayers(_id)
         ));
 
         return svgBody;
