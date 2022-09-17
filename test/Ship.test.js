@@ -12,14 +12,10 @@ const generateImage = async function( metadata, filename ) {
     const decodedMetadata = Buffer.from(trimmedMeta, 'base64');
     const stringMetadata = decodedMetadata.toString('ascii');
 
-    //console.log("meta", metadata, stringMetadata);
-
     const parsedMeta = JSON.parse(stringMetadata);
     const imageData = parsedMeta.image.substring(26);
     const decodedImage = Buffer.from(imageData, 'base64');
     const imageString = decodedImage.toString('ascii');
-
-    //console.log("decodedImage", imageString);
 
     fs.writeFileSync(`test/${filename}.svg`, imageString);
 }
@@ -44,72 +40,149 @@ describe('SVG General', function() {
 
     // Deploy a fresh set of smart contracts, using these constants, for testing.
 
-    let substrate721, composite721_1, composite721_2, composite721_3, composite721_4, composite721_5;
+    let ship721, droneA, droneB, motor, laserWeaponA, laserWeaponB, droneUpgrade;
+    let bodyRed, bodyGreen, bodyBlue, bodyYellow, bodyPurple, bodyCyan;
+
     beforeEach(async () => {
   
         // Deploy an instance of the Composite721 ERC-721 item contract.
-        substrate721 = await Composite721.connect(alice.signer).deploy(
+        ship721 = await Composite721.connect(alice.signer).deploy(
             "Substrate",
             "SUBSTR",
             555,
             ethers.constants.AddressZero,
             [1000,1000,0,0]
         );
-        await substrate721.deployed();
+        await ship721.deployed();
 
-        composite721_1 = await Composite721.connect(alice.signer).deploy(
-            "Drone721",
-            "DRONE721",
+        droneA = await Composite721.connect(alice.signer).deploy(
+            "DroneA721",
+            "DRONEA721",
             100,
-            substrate721.address,
+            ship721.address,
             [300,200,600,100]
         );
-        await composite721_1.deployed();
+        await droneA.deployed();
 
-        composite721_2 = await Composite721.connect(alice.signer).deploy(
+        droneB = await Composite721.connect(alice.signer).deploy(
+            "DroneB721",
+            "DRONEB721",
+            100,
+            ship721.address,
+            [300,200,600,100]
+        );
+        await droneB.deployed();
+
+        motor = await Composite721.connect(alice.signer).deploy(
             "Motor721",
             "MOTOR721",
             200,
-            substrate721.address,
+            ship721.address,
             [200,200,50,400]
         );
                 
-        await composite721_2.deployed();
+        await motor.deployed();
 
-        composite721_3 = await Composite721.connect(alice.signer).deploy(
+        laserWeaponA = await Composite721.connect(alice.signer).deploy(
             "WeaponA721",
             "WEAPONA721",
             300,
-            substrate721.address,
+            ship721.address,
             [500,100,200,700]
         );
-        await composite721_3.deployed();
+        await laserWeaponA.deployed();
 
-        composite721_4 = await Composite721.connect(alice.signer).deploy(
+        laserWeaponB = await Composite721.connect(alice.signer).deploy(
             "WeaponB721",
             "WEAPONB721",
             300,
-            substrate721.address,
+            ship721.address,
             [500,100,200,700]
         );
-        await composite721_4.deployed();
+        await laserWeaponB.deployed();
 
-        composite721_5 = await Composite721.connect(alice.signer).deploy(
-            "C5",
-            "C45",
+        droneUpgrade = await Composite721.connect(alice.signer).deploy(
+            "DroneUpgrade",
+            "dUPG",
             300,
-            substrate721.address,
-            [100,100,0,0]
+            droneA.address,
+            [300,200,0,0]
         );
-        await composite721_5.deployed();
+        await droneUpgrade.deployed();
 
-        await substrate721.mint(bob.address, 2);
-        await composite721_1.mint(bob.address, 2);
-        await composite721_2.mint(bob.address, 1);
-        await composite721_3.mint(bob.address, 1);
-        await composite721_4.mint(bob.address, 1);
-        await composite721_5.mint(bob.address, 1);
+        bodyRed = await Composite721.connect(alice.signer).deploy(
+            "BodyRed",
+            "bUPG",
+            300,
+            ship721.address,
+            [700,450,206,279]
+        );
+        await bodyRed.deployed();
 
+        bodyGreen = await Composite721.connect(alice.signer).deploy(
+            "BodyGreen",
+            "bUPG",
+            300,
+            ship721.address,
+            [700,450,206,279]
+        );
+        await bodyGreen.deployed();
+
+        bodyBlue = await Composite721.connect(alice.signer).deploy(
+            "BodyBlue",
+            "bUPG",
+            300,
+            ship721.address,
+            [700,450,206,279]
+        );
+        await bodyGreen.deployed();
+
+
+        bodyYellow= await Composite721.connect(alice.signer).deploy(
+            "bodyYellow",
+            "bUPG",
+            300,
+            ship721.address,
+            [700,450,206,279]
+        );
+        await bodyYellow.deployed();
+
+        bodyPurple = await Composite721.connect(alice.signer).deploy(
+            "bodyPurple",
+            "bUPG",
+            300,
+            ship721.address,
+            [700,450,206,279]
+        );
+        await bodyPurple.deployed();
+
+        bodyCyan = await Composite721.connect(alice.signer).deploy(
+            "bodyCyan",
+            "bUPG",
+            300,
+            ship721.address,
+            [700,450,206,279]
+        );
+        await bodyCyan.deployed();
+
+        await ship721.mint(bob.address, 20);
+
+        await droneA.mint(bob.address, 2);
+        await droneB.mint(bob.address, 2);
+        await droneUpgrade.mint(bob.address, 2);
+
+        await motor.mint(bob.address, 2);
+
+        await laserWeaponA.mint(bob.address, 2);
+        await laserWeaponB.mint(bob.address, 2);
+
+        await bodyRed.mint(bob.address, 1);
+        await bodyGreen.mint(bob.address, 1);
+        await bodyBlue.mint(bob.address, 1);
+
+        await bodyYellow.mint(bob.address, 1);
+        await bodyPurple.mint(bob.address, 1);
+        await bodyCyan.mint(bob.address, 1);
   
     });
 
@@ -118,110 +191,96 @@ describe('SVG General', function() {
         it('generates SVG from composite', async function() {
 
             const svgGrid = `
-    <rect fill="rgb(0,0,0)" width="1000" height="1000" x="0" y="0" />
-    <rect fill="rgb(204,204,204)" width="625" height="62" x="248" y="540" />
-    <rect fill="rgb(236,236,236)" width="385" height="104" x="248" y="436" />
-    <rect fill="rgb(0,255,255)" width="156" height="98" x="635" y="440" />
-    <rect fill="rgb(236,236,236)" width="94" height="83" x="290" y="290" />
-    <rect fill="rgb(204,204,204)" width="260" height="62" x="268" y="373" />
-    <rect fill="rgb(204,204,204)" width="385" height="52" x="299" y="602" />
-    <rect fill="rgb(179,179,179)" width="160" height="52" x="299" y="654" />
-    <rect fill="rgb(102,102,102)" width="240" height="20" x="299" y="706" />
-    <rect fill="rgb(102,102,102)" width="62" height="125" x="247" y="602" />
-    <rect fill="rgb(102,102,102)" width="27" height="104" x="219" y="477" />`;
+            <rect fill="rgb(0,0,0)" width="1000" height="1000" x="0" y="0" />
+            <rect fill="rgb(204,204,204)" width="625" height="62" x="248" y="540" />
+            <rect fill="rgb(236,236,236)" width="385" height="104" x="248" y="436" />
+            <rect fill="rgb(0,255,255)" width="156" height="98" x="635" y="440" />
+            <rect fill="rgb(236,236,236)" width="94" height="83" x="290" y="290" />
+            <rect fill="rgb(204,204,204)" width="260" height="62" x="268" y="373" />
+            <rect fill="rgb(204,204,204)" width="385" height="52" x="299" y="602" />
+            <rect fill="rgb(179,179,179)" width="160" height="52" x="299" y="654" />
+            <rect fill="rgb(102,102,102)" width="240" height="20" x="299" y="706" />
+            <rect fill="rgb(102,102,102)" width="62" height="125" x="247" y="602" />
+            <rect fill="rgb(102,102,102)" width="27" height="104" x="219" y="477" />`;
 
-            await substrate721.connect(alice.signer).setBaseLayer(svgGrid);
-            // await composite721_1.connect(alice.signer).toggleComponent(true);
+            await ship721.connect(alice.signer).setBaseLayer(svgGrid);
 
-            // await substrate721.connect(alice.signer).updateGlobalLayer(
-            //     1, 
-            //     [
-            //         composite721_1.address,
-            //         1
-            //     ]
-            // );
+            const drone_A = ` 
+            <rect fill="rgb(236,236,236)" width="134" height="134" x="113" y="33" />
+            <rect fill="rgb(179,179,179)" width="25" height="100" x="95" y="49" />
+            <rect fill="rgb(0,255,255)" width="33" height="100" x="246" y="49" />
+            <rect fill="rgb(77,77,77)" width="50" height="83" x="45" y="58" />
+            <rect fill="rgb(0,255,255)" width="25" height="66" x="20" y="66" />`;
 
+            await droneA.connect(alice.signer).setBaseLayer(drone_A);
 
-            const drone_A = `
-            
-        <rect fill="rgb(236,236,236)" width="134" height="134" x="113" y="33" />
-        <rect fill="rgb(179,179,179)" width="25" height="100" x="95" y="49" />
-        <rect fill="rgb(0,255,255)" width="33" height="100" x="246" y="49" />
-        <rect fill="rgb(77,77,77)" width="50" height="83" x="45" y="58" />
-        <rect fill="rgb(0,255,255)" width="25" height="66" x="20" y="66" />
-        `;
-
-            // const svgDataRed = '<svg><rect width="96" height="96" x="104" y="104" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" /></svg>';
-
-            await composite721_1.connect(alice.signer).setBaseLayer(drone_A);
-            await composite721_1.connect(alice.signer).toggleComponent(true);
-
-            await substrate721.connect(bob.signer).setLayer(
+            await ship721.connect(bob.signer).setLayer(
                 1,
                 0, 
                 [
-                    composite721_1.address,
+                    droneA.address,
                     1
                 ]
             );
 
-            // const drone_B = `
-            
-            // <rect fill="rgb(255,255,0)" width="134" height="134" x="113" y="33" />
-            // <rect fill="rgb(179,179,179)" width="25" height="100" x="95" y="49" />
-            // <rect fill="rgb(255,255,255)" width="33" height="100" x="246" y="49" />
-            // <rect fill="rgb(77,77,77)" width="50" height="83" x="45" y="58" />
-            // <rect fill="rgb(0,255,255)" width="25" height="66" x="20" y="66" />
-            // `;
+            const drone_B = `
+            <rect fill="rgb(255,255,0)" width="134" height="134" x="113" y="33" />
+            <rect fill="rgb(179,179,179)" width="25" height="100" x="95" y="49" />
+            <rect fill="rgb(255,255,255)" width="33" height="100" x="246" y="49" />
+            <rect fill="rgb(77,77,77)" width="50" height="83" x="45" y="58" />
+            <rect fill="rgb(0,255,255)" width="25" height="66" x="20" y="66" />`;
+
+            await droneB.connect(alice.signer).setBaseLayer(drone_B);
+            await droneB.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                2,
+                0, 
+                [
+                    droneB.address,
+                    1
+                ]
+            );
 
             const motor_A = `
-    <rect fill="rgb(102,102,102)" width="35" height="183" x="145" y="6" />
-    <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="18" />
-    <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="24" />
-    <rect fill="rgb(0,255,255)" width="45" height="49" x="44" y="30" />
-    <rect fill="rgb(0,255,255)" width="23" height="47" x="9" y="30" />
-    <rect fill="rgb(0,255,255)" width="23" height="47" x="9" y="1071" />
-    <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="93" />
-    <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="100" />
-    <rect fill="rgb(0,255,255)" width="45" height="49" x="44" y="106" />
-       `;
-    
-                // const svgDataRed = '<svg><rect width="96" height="96" x="104" y="104" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" /></svg>';
-    
-                await composite721_2.connect(alice.signer).setBaseLayer(motor_A);
-                await composite721_2.connect(alice.signer).toggleComponent(true);
-    
-                await substrate721.connect(bob.signer).setLayer(
-                    1, 
-                    1,
-                    [
-                        composite721_2.address,
-                        1
-                    ]
-                );
-
-            //const sdata = await substrate721.svgData(1);
-            //console.log("sdata", sdata)
-
-            // const svgDataGreen = '<svg><rect width="96" height="96" x="204" y="204" style="fill:rgb(0,255,0);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
-
-            const weapon_A = `
-    <rect fill="rgb(102,102,102)" width="350" height="45" x="40" y="25" />
-    <rect fill="rgb(179,179,179)" width="280" height="25" x="50" y="35" />
-    <rect fill="rgb(0,255,255)" width="40" height="25" x="340" y="35" />
-    <rect fill="rgb(0,255,255)" width="85" height="25" x="400" y="35" />
-    <rect fill="rgb(0,255,255)" width="15" height="45" x="25" y="25" />
+            <rect fill="rgb(102,102,102)" width="35" height="183" x="145" y="6" />
+            <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="18" />
+            <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="24" />
+            <rect fill="rgb(0,255,255)" width="45" height="49" x="44" y="30" />
+            <rect fill="rgb(0,255,255)" width="23" height="47" x="9" y="30" />
+            <rect fill="rgb(0,255,255)" width="23" height="47" x="9" y="106" />
+            <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="93" />
+            <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="100" />
+            <rect fill="rgb(0,255,255)" width="45" height="49" x="44" y="106" />
             `;
 
-            await composite721_3.connect(alice.signer).setBaseLayer(weapon_A);
-            await composite721_3.connect(alice.signer).toggleComponent(true);
-            // await composite721_3.connect(alice.signer).updateSubstrate(composite721_5.address, true);
+            await motor.connect(alice.signer).setBaseLayer(motor_A);
+            await motor.connect(alice.signer).toggleComponent(true);
 
-            await substrate721.connect(bob.signer).setLayer(
+            await ship721.connect(bob.signer).setLayer(
+                1, 
+                1,
+                [
+                    motor.address,
+                    1
+                ]
+            );
+
+            const weapon_A = `
+            <rect fill="rgb(102,102,102)" width="350" height="45" x="40" y="25" />
+            <rect fill="rgb(179,179,179)" width="280" height="25" x="50" y="35" />
+            <rect fill="rgb(0,255,255)" width="40" height="25" x="340" y="35" />
+            <rect fill="rgb(0,255,255)" width="85" height="25" x="400" y="35" />
+            <rect fill="rgb(0,255,255)" width="15" height="45" x="25" y="25" />`;
+
+            await laserWeaponA.connect(alice.signer).setBaseLayer(weapon_A);
+            await laserWeaponA.connect(alice.signer).toggleComponent(true);
+            
+            await ship721.connect(bob.signer).setLayer(
                 1,
                 2, 
                 [
-                    composite721_3.address,
+                    laserWeaponA.address,
                     1
                 ]
             );
@@ -239,57 +298,206 @@ describe('SVG General', function() {
             <rect fill="rgb(255,255,0)" width="15" height="45" x="25" y="55" />
             `;
 
-            await composite721_4.connect(alice.signer).setBaseLayer(weapon_B);
-            await composite721_4.connect(alice.signer).toggleComponent(true);
-            // await composite721_3.connect(alice.signer).updateSubstrate(composite721_5.address, true);
+            await laserWeaponB.connect(alice.signer).setBaseLayer(weapon_B);
+            await laserWeaponB.connect(alice.signer).toggleComponent(true);
 
-            await substrate721.connect(bob.signer).setLayer(
+            await ship721.connect(bob.signer).setLayer(
                 1, 
                 3,
                 [
-                    composite721_4.address,
+                    laserWeaponB.address,
                     1
                 ]
             );
-        
-            // const svgDataBlue = '<svg><rect width="96" height="96" x="304" y="304" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(255,0,0)" /></svg>';
 
-            // await composite721_4.connect(alice.signer).setBaseLayer(svgDataBlue);
-            // await composite721_4.connect(alice.signer).toggleComponent(true);
-            // await composite721_4.connect(alice.signer).updateSubstrate(composite721_5.address, true);
-            await substrate721.connect(bob.signer).setLayer(
+            await ship721.connect(bob.signer).setLayer(
                 2, 
-                0,
+                1,
                 [
-                    composite721_1.address,
+                    laserWeaponB.address,
                     2
                 ]
             );
 
-        
-            // await substrate721.connect(bob.signer).addLayer(
-            //     1, 
-            //     [
-            //         composite721_5.address,
-            //         1
-            //     ]
-            // );
+            const drone_upgrade = `
+            <rect fill="rgb(179,179,179)" width="20" height="160" x="160" y="20" />
+            <rect fill="rgb(33,103,120)" width="20" height="160" x="70" y="20" />
+            <rect fill="rgb(128,128,128)" width="200" height="15" x="60" y="5" />
+            <rect fill="rgb(128,128,128)" width="200" height="15" x="60" y="180" />
+            <rect fill="rgb(0,255,255)" width="35" height="15" x="15" y="5" />
+            <rect fill="rgb(0,255,255)" width="35" height="15" x="15" y="180" />
+            <rect fill="rgb(179,179,179)" width="105" height="100" x="130" y="50" />    `;
+
+            await droneUpgrade.connect(alice.signer).setBaseLayer(drone_upgrade);
+            await droneUpgrade.connect(alice.signer).toggleComponent(true);
+
+            await droneA.connect(bob.signer).setLayer(
+                1, 
+                0,
+                [
+                    droneUpgrade.address,
+                    1
+                ]
+            );
+
+            const body_red = `
+            <rect fill="rgb(170,0,0)" width="625" height="62.5" x="42" y="260" />
+            <rect fill="rgb(212,0,0)" width="385" height="104" x="42." y="156" />
+            <rect fill="rgb(212,0,0)" width="93.75" height="83" x="84" y="10" />
+            <rect fill="rgb(170,0,0)" width="260" height="62.5" x="63" y="93" />
+            <rect fill="rgb(170,0,0)" width="385" height="52" x="94" y="322.5" />
+            <rect fill="rgb(128,0,0)" width="160" height="52" x="94" y="374" />
+            `;
+
+            await bodyRed.connect(alice.signer).setBaseLayer(body_red);
+            await bodyRed.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                2, 
+                2,
+                [
+                    bodyRed.address,
+                    1
+                ]
+            );
+
+            const body_green = `
+            <rect fill="rgb(0,170,0)" width="625" height="62.5" x="42" y="260" />
+            <rect fill="rgb(0,212,0)" width="385" height="104" x="42." y="156" />
+            <rect fill="rgb(0,212,0)" width="93.75" height="83" x="84" y="10" />
+            <rect fill="rgb(0,170,0)" width="260" height="62.5" x="63" y="93" />
+            <rect fill="rgb(0,170,0)" width="385" height="52" x="94" y="322.5" />
+            <rect fill="rgb(0,128,0)" width="160" height="52" x="94" y="374" />
+            <rect fill="rgb(255,0,255)" width="157" height="98" x="427" y="162" />
+            `;
+
+            await bodyGreen.connect(alice.signer).setBaseLayer(body_green);
+            await bodyGreen.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                7, 
+                0,
+                [
+                    bodyGreen.address,
+                    1
+                ]
+            );
             
+            const body_blue = `
+            <rect fill="rgb(0,0,170)" width="625" height="62.5" x="42" y="260" />
+            <rect fill="rgb(0,0,212)" width="385" height="104" x="42." y="156" />
+            <rect fill="rgb(0,0,212)" width="93.75" height="83" x="84" y="10" />
+            <rect fill="rgb(0,0,170)" width="260" height="62.5" x="63" y="93" />
+            <rect fill="rgb(0,0,170)" width="385" height="52" x="94" y="322.5" />
+            <rect fill="rgb(0,0,128)" width="160" height="52" x="94" y="374" />
+            <rect fill="rgb(255,255,0)" width="157" height="98" x="427" y="162" />
+            `;
 
-            const globalLayerCount = await substrate721.globalLayerCount();
-            //console.log("globalLayerCount", globalLayerCount);
+            await bodyBlue.connect(alice.signer).setBaseLayer(body_blue);
+            await bodyBlue.connect(alice.signer).toggleComponent(true);
 
-            let metadata = await substrate721.connect(bob.signer).tokenURI(1);
+            await ship721.connect(bob.signer).setLayer(
+                3, 
+                0,
+                [
+                    bodyBlue.address,
+                    1
+                ]
+            );
+
+                        
+            const body_yellow = `
+            <rect fill="rgb(170,170,0)" width="625" height="62.5" x="42" y="260" />
+            <rect fill="rgb(212,212,0)" width="385" height="104" x="42." y="156" />
+            <rect fill="rgb(212,212,0)" width="93.75" height="83" x="84" y="10" />
+            <rect fill="rgb(170,170,0)" width="260" height="62.5" x="63" y="93" />
+            <rect fill="rgb(170,170,0)" width="385" height="52" x="94" y="322.5" />
+            <rect fill="rgb(128,128,0)" width="160" height="52" x="94" y="374" />
+            <rect fill="rgb(0,0,255)" width="157" height="98" x="427" y="162" />
+            `;
+
+            await bodyYellow.connect(alice.signer).setBaseLayer(body_yellow);
+            await bodyYellow.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                4, 
+                0,
+                [
+                    bodyYellow.address,
+                    1
+                ]
+            );
+
+                        
+            const body_purple = `
+            <rect fill="rgb(170,0,170)" width="625" height="62.5" x="42" y="260" />
+            <rect fill="rgb(212,0,212)" width="385" height="104" x="42." y="156" />
+            <rect fill="rgb(212,0,212)" width="93.75" height="83" x="84" y="10" />
+            <rect fill="rgb(170,0,170)" width="260" height="62.5" x="63" y="93" />
+            <rect fill="rgb(170,0,170)" width="385" height="52" x="94" y="322.5" />
+            <rect fill="rgb(128,0,128)" width="160" height="52" x="94" y="374" />
+            <rect fill="rgb(255,255,0)" width="157" height="98" x="427" y="162" />
+            `;
+
+            await bodyPurple.connect(alice.signer).setBaseLayer(body_purple);
+            await bodyPurple.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                5, 
+                0,
+                [
+                    bodyPurple.address,
+                    1
+                ]
+            );
+
+                        
+            const body_cyan = `
+            <rect fill="rgb(0,170,170)" width="625" height="62.5" x="42" y="260" />
+            <rect fill="rgb(0,212,212)" width="385" height="104" x="42." y="156" />
+            <rect fill="rgb(0,212,212)" width="93.75" height="83" x="84" y="10" />
+            <rect fill="rgb(0,170,170)" width="260" height="62.5" x="63" y="93" />
+            <rect fill="rgb(0,170,170)" width="385" height="52" x="94" y="322.5" />
+            <rect fill="rgb(0,128,128)" width="160" height="52" x="94" y="374" />
+            <rect fill="rgb(255,255,0)" width="157" height="98" x="427" y="162" />
+            `;
+
+            await bodyCyan.connect(alice.signer).setBaseLayer(body_cyan);
+            await bodyCyan.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                6, 
+                0,
+                [
+                    bodyCyan.address,
+                    1
+                ]
+            );
+            
+            let metadata = await ship721.connect(bob.signer).tokenURI(1);
             await generateImage(metadata, "ship");
 
-            metadata = await substrate721.connect(bob.signer).tokenURI(2);
+            metadata = await ship721.connect(bob.signer).tokenURI(2);
             await generateImage(metadata, "ship2");
+            metadata = await ship721.connect(bob.signer).tokenURI(3);
+            await generateImage(metadata, "ship3");
+            metadata = await ship721.connect(bob.signer).tokenURI(4);
+            await generateImage(metadata, "ship4");
+            metadata = await ship721.connect(bob.signer).tokenURI(5);
+            await generateImage(metadata, "ship5");
+            metadata = await ship721.connect(bob.signer).tokenURI(6);
+            await generateImage(metadata, "ship6");
+            metadata = await ship721.connect(bob.signer).tokenURI(7);
+            await generateImage(metadata, "ship5");
 
-            metadata = await composite721_1.connect(bob.signer).tokenURI(1);
-            await generateImage(metadata, "c1");
+            metadata = await droneA.connect(bob.signer).tokenURI(1);
+            await generateImage(metadata, "droneA");
 
-            metadata = await composite721_1.connect(bob.signer).tokenURI(2);
-            await generateImage(metadata, "c2");
+            metadata = await droneB.connect(bob.signer).tokenURI(1);
+            await generateImage(metadata, "droneB");
+
+            metadata = await droneUpgrade.connect(bob.signer).tokenURI(2);
+            await generateImage(metadata, "drone_upgrade");
 
         });
     });
