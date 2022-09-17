@@ -38,7 +38,8 @@ describe('Composite721', function() {
       NAME,
       SYMBOL,
       CAP,
-      ethers.constants.AddressZero
+      ethers.constants.AddressZero,
+      [1000,1000,0,0]
     );
     await composite721.deployed();
 

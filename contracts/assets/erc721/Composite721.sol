@@ -3,6 +3,7 @@ pragma solidity ^0.8.11;
 
 import "./Tiny721.sol";
 import "../../meta/OnChainMeta.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 error ItemNotAssigned();
 error LayerOwnerNotSender();
@@ -13,22 +14,32 @@ error RecursiveLayer();
 interface IComp721 {
     function assignment ( uint256 id ) external view returns ( bool );
     function ownerOf ( uint256 id ) external view returns ( address );
-    function svgData ( uint256 id ) external view returns ( string memory );
+    function svgData ( uint256 id, uint256 depth ) external view returns ( string memory );
     function setAssignment ( uint256 _id, bool _status ) external;
 }
 
 contract Composite721 is Tiny721, OnChainMeta {
+    using Strings for uint128;
     /// The item contract and item id that comprise this layer
     struct Layer {
         address item;
         uint256 id;
     }
 
+    /// The global svg size settings for the image data
+    // struct Dimensions {
+    //     uint128 width;
+    //     uint128 height;
+    // }
+
+    /// Dimension settings
+    OnChainMeta.Dimensions public dimensions;
+
     /// Boolean flag for component status
     bool public isComponent;
 
     /// svgData if component
-    string public componentData;
+    string public baseLayer;
 
     /// Count of global layers
     uint256 public globalLayerCount;
@@ -73,10 +84,12 @@ contract Composite721 is Tiny721, OnChainMeta {
         string memory _name,
         string memory _symbol,
         uint256 _cap,
-        address _substrate
+        address _substrate,
+        Dimensions memory _dimensions
     ) Tiny721(_name, _symbol, _cap) {
         substrates[_substrate] = true;
         substrates[address(this)] = true;
+        dimensions = _dimensions;
     }
 
 
@@ -84,16 +97,18 @@ contract Composite721 is Tiny721, OnChainMeta {
         Token owners can use this function to add a layer to a given item that 
         they possess.
 
-        @param _id The ID of the token to modify.
+        @param _tokenId The ID of the token to modify.
+        @param _layerId The ID of the layer to modify.
         @param _layer The data to add to the layer, { item address, item id }
 
     */
-    function addLayer (
-        uint256 _id,
+    function setLayer (
+        uint256 _tokenId,
+        uint256 _layerId,
         Layer memory _layer
-    ) public onlyTokenOwner(_id) {
+    ) public onlyTokenOwner(_tokenId) {
         // prevent recursive assignment
-        if(_layer.id == _id && _layer.item == address(this)){
+        if(_layer.id == _tokenId && _layer.item == address(this)){
             revert RecursiveLayer();
         }
 
@@ -105,7 +120,6 @@ contract Composite721 is Tiny721, OnChainMeta {
         // get the layer from the item contract
         address layerOwner; 
         bool layerAssigned;
-        uint256 zIndex = layerCounts[_id];
 
         if(_layer.item == address(this)){
             layerOwner = this.ownerOf(_layer.id);
@@ -128,19 +142,19 @@ contract Composite721 is Tiny721, OnChainMeta {
         
         
         // check for existing layer data
-        Layer memory existing = layers[_id][zIndex];
+        Layer memory existing = layers[_tokenId][_layerId];
 
         // increment layer count if new layer
         if(existing.item == address(0) && existing.id == uint(0)){
-            ++layerCounts[_id];
+            ++layerCounts[_tokenId];
         }
 
         
         // save layer data
-        layers[_id][zIndex] = _layer;
+        layers[_tokenId][_layerId] = _layer;
         IComp721(_layer.item).setAssignment(_layer.id, true);
 
-        emit Assigned( _layer.item, _layer.id, _id, true );
+        emit Assigned( _layer.item, _layer.id, _tokenId, true );
     }
 
 
@@ -207,9 +221,11 @@ contract Composite721 is Tiny721, OnChainMeta {
         uint256 _id
     ) external view virtual override returns (string memory) {
         if (!_exists(_id)) { revert URIQueryForNonexistentToken(); }
-        
-        string memory _svgData = string(abi.encodePacked(this.svgData(_id), '</svg>'));
-        return _buildMeta(_id, _svgData);
+        // string memory svgBody = string(abi.encodePacked(
+        //     this.svgData(_id, 0),
+        //     '</svg>'
+        // ));
+        return _buildMeta(_id, this.svgData(_id, 0));
     }
 
 
@@ -235,67 +251,82 @@ contract Composite721 is Tiny721, OnChainMeta {
         @return The SVG data of the token with the ID of `_id`.
     */
     function svgData (
-        uint256 _id 
+        uint256 _id,
+        uint256 _depth
     ) external view returns (string memory) {
-        if(isComponent){
-            return componentData;
+
+        string memory openTag;
+
+        if(_depth == 0){
+            openTag = string(abi.encodePacked(
+                '<svg width="',
+                dimensions.width.toString(),
+                '" height="',
+                dimensions.height.toString(),
+                '" x="0" y="0" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><rect fill="rgb(0,0,0)" width="',
+                dimensions.width.toString(),
+                '" height="',
+                dimensions.height.toString(),
+                '" />'
+            ));
+        }else{
+            openTag = string(abi.encodePacked(
+                '<svg width="',
+                dimensions.width.toString(),
+                '" height="',
+                dimensions.height.toString(),
+                '" x="',
+                dimensions.x.toString(),
+                '" y="',
+                dimensions.y.toString(),
+                '" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">'
+            ));
         }
 
-        string memory svgBody;
+
+        string memory svgBody = string(abi.encodePacked(
+                openTag,
+                baseLayer
+            ));
 
         if(globalLayerCount > 0){
-            svgBody = _getGlobalLayer();
+            svgBody = string(abi.encodePacked(
+                svgBody,
+                _getGlobalLayer(_depth)
+            ));
         }
 
-        // uint256 layerCount = layerCounts[_id];
-        // for(uint i=0; i < layerCount; ++i){
-        //     Layer memory layer = layers[_id][i];
-        //     string memory svgLayer;
-        //     address layerOwner;
-
-        //     if(layer.item == address(this)){
-        //         //if not component and if item contract is this contract, refer to local storage for data
-        //         svgLayer = this.svgData(layer.id);
-        //         layerOwner = this.ownerOf(layer.id);
-        //     }else{
-        //         // else call the contract to return the layer
-        //         svgLayer = IComp721(layer.item).svgData(layer.id);
-        //         layerOwner = IComp721(layer.item).ownerOf(layer.id);
-        //     }
-
-        //     // if layer/component owner is not substrate owner, ignore this layer
-        //     if(layerOwner != this.ownerOf(_id)){
-        //         continue;
-        //     }
-
-        //     svgBody = string(abi.encodePacked(
-        //         svgBody,
-        //         svgLayer
-        //     ));
-        // }
+        if(isComponent){
+            svgBody = string(abi.encodePacked(
+            svgBody,
+            '</svg>'
+        ));
+            return svgBody;
+        }
 
         svgBody = string(abi.encodePacked(
-            //'<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
             svgBody,
-            _getUserLayers(_id)
-        ));
+            _getUserLayers(_id, _depth),
+            '</svg>'
 
+        ));
+        
         return svgBody;
     }
 
     /**
         An internal helper for retrieving the base layer 
     */
-    function _getGlobalLayer( ) internal view returns (string memory){
+    function _getGlobalLayer( uint256 _depth ) internal view returns (string memory){
         string memory svgBody;
 
         for(uint i=1; i <= globalLayerCount; ++i){
             Layer memory layer = globalLayers[i];
             string memory svgLayer;
             if(layer.item == address(this)){
-                svgLayer = this.svgData(layer.id);
+                svgLayer = this.svgData(layer.id, _depth+1);
             }else{
-                svgLayer = IComp721(layer.item).svgData(layer.id);
+                svgLayer = IComp721(layer.item).svgData(layer.id, _depth+1);
             }
 
             svgBody =  string(abi.encodePacked(
@@ -312,7 +343,10 @@ contract Composite721 is Tiny721, OnChainMeta {
     
         @param _id The ID of the token data getting got
     */
-    function _getUserLayers( uint256 _id ) internal view returns (string memory){
+    function _getUserLayers( 
+        uint256 _id,
+        uint256 _depth 
+    ) internal view returns (string memory){
         string memory svgBody;
         uint256 layerCount = layerCounts[_id];
 
@@ -323,11 +357,11 @@ contract Composite721 is Tiny721, OnChainMeta {
 
             if(layer.item == address(this)){
                 //if not component and if item contract is this contract, refer to local storage for data
-                svgLayer = this.svgData(layer.id);
+                svgLayer = this.svgData(layer.id, _depth+1);
                 layerOwner = this.ownerOf(layer.id);
             }else{
                 // else call the contract to return the layer
-                svgLayer = IComp721(layer.item).svgData(layer.id);
+                svgLayer = IComp721(layer.item).svgData(layer.id, _depth+1);
                 layerOwner = IComp721(layer.item).ownerOf(layer.id);
             }
 
@@ -350,8 +384,8 @@ contract Composite721 is Tiny721, OnChainMeta {
 
         @param _svgData The svg data to set for this item.
     */
-    function setComponent ( string memory _svgData ) external onlyOwner {
-        componentData = string(abi.encodePacked(_svgData));
+    function setBaseLayer ( string memory _svgData ) external onlyOwner {
+        baseLayer = string(abi.encodePacked(_svgData));
     }
 
 
@@ -374,6 +408,15 @@ contract Composite721 is Tiny721, OnChainMeta {
     function updateSubstrate ( address _substrate, bool _status ) public onlyOwner {
         substrates[_substrate] = _status;
     }    
+
+    /**
+        Modify an item's image dimensions.
+
+        @param _dimensions The image dimensions to update in the form of struct Dimensions.
+    */
+    function updateDimensions ( Dimensions memory _dimensions ) public onlyOwner {
+        dimensions = _dimensions;
+    }   
     
     /**
         Add a global layer that is displayed under all user layers

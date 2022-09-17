@@ -35,7 +35,8 @@ describe('Composite721', function() {
             "Substrate",
             "SUBSTR",
             555,
-            ethers.constants.AddressZero
+            ethers.constants.AddressZero,
+            [1000,1000,0,0]
         );
         await substrate721.deployed();
 
@@ -43,7 +44,8 @@ describe('Composite721', function() {
             "C1",
             "C1",
             100,
-            substrate721.address
+            substrate721.address,
+            [100,100,0,0]
         );
         await composite721_1.deployed();
 
@@ -51,7 +53,8 @@ describe('Composite721', function() {
             "C2",
             "C2",
             200,
-            substrate721.address
+            substrate721.address,
+            [100,100,0,0]
         );
         await composite721_2.deployed();
 
@@ -72,8 +75,9 @@ describe('Composite721', function() {
             //console.log("owners", ownerSubstrate, ownerComponent);
             //console.log("contracts", substrate721.address, composite721_1.address);
 
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     composite721_1.address,
                     1
@@ -85,8 +89,9 @@ describe('Composite721', function() {
                 0  
             );
 
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     composite721_1.address,
                     1
@@ -98,21 +103,23 @@ describe('Composite721', function() {
             const svgDataBlue = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
             const svgDataRed = '<svg width="400" height="110" x="200" y="200"><rect width="300" height="100" style="fill:rgb(255,0,0);stroke-width:3;stroke:rgb(0,255,0)" /></svg>';
 
-            await composite721_1.connect(alice.signer).setComponent(svgDataBlue);
+            await composite721_1.connect(alice.signer).setBaseLayer(svgDataBlue);
             await composite721_1.connect(alice.signer).toggleComponent(true);
 
-            await composite721_2.connect(alice.signer).setComponent(svgDataRed);
+            await composite721_2.connect(alice.signer).setBaseLayer(svgDataRed);
             await composite721_2.connect(alice.signer).toggleComponent(true);
 
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     composite721_1.address,
                     1
                 ]
             );
 
-            await substrate721.connect(bob.signer).addLayer(
+            await substrate721.connect(bob.signer).setLayer(
+                1,
                 1, 
                 [
                     composite721_2.address,
@@ -139,8 +146,9 @@ describe('Composite721', function() {
 
         it('reverts for an recursive layer assignment', async function() {
             await expect(
-                composite721_1.connect(bob.signer).addLayer(
-                    1, 
+                composite721_1.connect(bob.signer).setLayer(
+                    1,
+                    0, 
                     [
                         composite721_1.address,
                         1
@@ -152,13 +160,14 @@ describe('Composite721', function() {
         it('reverts on non-owner setting component', async function() {
             const svgData = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
             await expect(
-                composite721_1.connect(bob.signer).setComponent(svgData)
+                composite721_1.connect(bob.signer).setBaseLayer(svgData)
             ).to.be.revertedWith('Ownable: caller is not the owner');
         });
 
         it('reverts when adding assigned layer', async function() {
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     composite721_1.address,
                     1
@@ -166,8 +175,9 @@ describe('Composite721', function() {
             );
 
             await expect(
-                substrate721.connect(bob.signer).addLayer(
-                    1, 
+                substrate721.connect(bob.signer).setLayer(
+                    1,
+                    0, 
                     [
                         composite721_1.address,
                         1
@@ -184,8 +194,9 @@ describe('Composite721', function() {
             );
 
             await expect(
-                substrate721.connect(bob.signer).addLayer(
-                    1, 
+                substrate721.connect(bob.signer).setLayer(
+                    1,
+                    0, 
                     [
                         composite721_1.address,
                         1
@@ -197,12 +208,13 @@ describe('Composite721', function() {
         it('reverts for modifying layer to component', async function() {
             const svgDataBlue = '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" /></svg>';
             
-            await substrate721.connect(alice.signer).setComponent(svgDataBlue);
+            await substrate721.connect(alice.signer).setBaseLayer(svgDataBlue);
             await substrate721.connect(alice.signer).toggleComponent(true);
 
             await expect(
-                substrate721.connect(bob.signer).addLayer(
-                    1, 
+                substrate721.connect(bob.signer).setLayer(
+                    1,
+                    0, 
                     [
                         composite721_1.address,
                         1
@@ -228,8 +240,9 @@ describe('Composite721', function() {
         });
 
         it('reverts removing a layer that is not owned by msg.sender', async function() {
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     composite721_1.address,
                     1
@@ -251,8 +264,9 @@ describe('Composite721', function() {
         });
 
         it('reverts when modifying layers if not token owner', async function() {
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     composite721_1.address,
                     1
@@ -267,8 +281,9 @@ describe('Composite721', function() {
             ).to.be.revertedWith('NotAnAdmin');
 
             await expect(
-                substrate721.connect(carol.signer).addLayer(
-                    1, 
+                substrate721.connect(carol.signer).setLayer(
+                    1,
+                    0, 
                     [
                         composite721_1.address,
                         1
@@ -281,8 +296,9 @@ describe('Composite721', function() {
             await composite721_1.connect(alice.signer).updateSubstrate(substrate721.address, false);
 
             await expect(
-                substrate721.connect(bob.signer).addLayer(
-                    1, 
+                substrate721.connect(bob.signer).setLayer(
+                    1,
+                    0, 
                     [
                         composite721_1.address,
                         1
@@ -294,8 +310,9 @@ describe('Composite721', function() {
         it('self referential layers', async function() {
             await substrate721.mint(bob.address, 1);
   
-            await substrate721.connect(bob.signer).addLayer(
-                1, 
+            await substrate721.connect(bob.signer).setLayer(
+                1,
+                0, 
                 [
                     substrate721.address,
                     2

@@ -6,12 +6,18 @@ import 'base64-sol/base64.sol';
 
 contract OnChainMeta {
     using Strings for uint256;
+    using Strings for uint128;
 
     string public metaDescription = 'Composites';
 
-    function _buildMeta(uint256 _tokenId, string memory _svgData) internal view returns (string memory) {
+    struct Dimensions {
+      uint128 width;
+      uint128 height;
+      uint128 x;
+      uint128 y;
+    }
 
-      //string memory svgHead = Composite.generateHead(_settings); 
+    function _buildMeta(uint256 _tokenId, string memory _svgData) internal view returns (string memory) {
 
       string memory metadata = string(abi.encodePacked(
         '{"name":"',
