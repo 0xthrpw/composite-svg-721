@@ -141,7 +141,7 @@ describe('Composite721', function() {
 
             //console.log("decodedImage", imageString);
 
-            fs.writeFileSync('test/token.svg', imageString);
+            fs.writeFileSync('art/token.svg', imageString);
         });
 
         it('reverts for an recursive layer assignment', async function() {

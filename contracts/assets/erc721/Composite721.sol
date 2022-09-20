@@ -26,12 +26,6 @@ contract Composite721 is Tiny721, OnChainMeta {
         uint256 id;
     }
 
-    /// The global svg size settings for the image data
-    // struct Dimensions {
-    //     uint128 width;
-    //     uint128 height;
-    // }
-
     /// Dimension settings
     OnChainMeta.Dimensions public dimensions;
 
@@ -221,10 +215,7 @@ contract Composite721 is Tiny721, OnChainMeta {
         uint256 _id
     ) external view virtual override returns (string memory) {
         if (!_exists(_id)) { revert URIQueryForNonexistentToken(); }
-        // string memory svgBody = string(abi.encodePacked(
-        //     this.svgData(_id, 0),
-        //     '</svg>'
-        // ));
+
         return _buildMeta(_id, this.svgData(_id, 0));
     }
 
@@ -298,9 +289,9 @@ contract Composite721 is Tiny721, OnChainMeta {
 
         if(isComponent){
             svgBody = string(abi.encodePacked(
-            svgBody,
-            '</svg>'
-        ));
+                svgBody,
+                '</svg>'
+            ));
             return svgBody;
         }
 

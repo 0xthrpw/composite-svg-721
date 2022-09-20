@@ -2,12 +2,22 @@
 
 // Imports.
 const { ethers } = require('hardhat');
+const fs = require('fs');
 
 // These are the constants for the item contract.
-const ITEM_NAME = 'Component 1';
-const ITEM_SYMBOL = 'C1';
+const ITEM_NAME = 'Drone A';
+const ITEM_SYMBOL = 'drnA';
 const CAP = 100;
-SUBSTRATE_ADDRESS = '0x1FE2853c71006F03A6eA0a4EEeD97507C6e3A6f9';
+const SUBSTRATE_ADDRESS = '0xfb6c7cc444366655fb57301a6afca531abd2f591';
+const SETTINGS = [300,200,600,100]
+
+let SVG_DATA = 
+`<rect fill="rgb(236,236,236)" width="134" height="134" x="113" y="33" />
+<rect fill="rgb(179,179,179)" width="25" height="100" x="95" y="49" />
+<rect fill="rgb(0,255,255)" width="33" height="100" x="246" y="49" />
+<rect fill="rgb(77,77,77)" width="50" height="83" x="45" y="58" />
+<rect fill="rgb(0,255,255)" width="25" height="66" x="20" y="66" />`;
+  
 
 async function logTransactionGas(transaction) {
   let transactionReceipt = await transaction.wait();
@@ -35,21 +45,14 @@ async function main() {
   // Create a variable to track the total gas cost of deployment.
   let totalGasCost = ethers.utils.parseEther('0');
 
-  const SETTINGS = {
-    x: 250,
-    y: 250,
-    z: 1,
-    w: 500,
-    h: 500
-  }
 
   // Deploy the testing Composite721 item contract.
   let composite721 = await Composite721.connect(deployer.signer).deploy(
     ITEM_NAME,
     ITEM_SYMBOL,
     CAP,
-    SETTINGS,
-    SUBSTRATE_ADDRESS
+    SUBSTRATE_ADDRESS,
+    SETTINGS
   );
 
   let composite721Deployed = await composite721.deployed();
@@ -59,14 +62,39 @@ async function main() {
     await logTransactionGas(composite721Deployed.deployTransaction)
   );
 
-  let svgData = '<rect width="500" height="500" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)" />';
-  let configTx = await composite721.setComponent(svgData);
-
-  let statusTx = await composite721.toggleComponent(true);
+  let deploymentArgs = [
+    ITEM_NAME,
+    ITEM_SYMBOL,
+    CAP,
+    SUBSTRATE_ADDRESS,
+    SETTINGS
+  ];
+  fs.writeFileSync('scripts/args/composite-args.js', `module.exports = ${JSON.stringify(deploymentArgs, null, 2)}`);
 
   // Log a verification command.
   console.log(`[VERIFY] npx hardhat verify --network rinkeby \
     ${composite721.address} --constructor-args scripts/args/composite-args.js`);
+  
+  console.log('');
+  console.log(`* Minting item...`);
+  let mintTx = await composite721.connect(deployer.signer).mint(deployer.address, 1);
+  totalGasCost = totalGasCost.add(
+     await logTransactionGas(mintTx)
+  );
+
+  console.log('');
+  console.log(`* Item minted. Updating SVG data...`);
+  let configTx = await composite721.setBaseLayer(SVG_DATA);
+  totalGasCost = totalGasCost.add(
+     await logTransactionGas(configTx)
+  );
+  console.log(`* SVG data updated. Setting component flag...`);
+
+  let statusTx = await composite721.toggleComponent(true);
+  totalGasCost = totalGasCost.add(
+     await logTransactionGas(statusTx)
+  );
+  console.log(`* Component flag set.`);
 
   // Log the final gas cost of deployment.
   console.log('');

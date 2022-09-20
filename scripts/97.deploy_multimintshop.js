@@ -3,11 +3,6 @@
 // Imports.
 const { ethers } = require('hardhat');
 
-// These are the constants for the item contract.
-const ITEM_NAME = 'SuperSpaceShip ';
-const ITEM_SYMBOL = 'SSS';
-const CAP = 555;
-
 async function logTransactionGas(transaction) {
   let transactionReceipt = await transaction.wait();
   let transactionGasCost = transactionReceipt.gasUsed;
@@ -29,21 +24,15 @@ async function main() {
   console.log(`Deploying contracts from: ${deployer.address}`);
 
   // Retrieve the necessary contract factories.
-  const Composite721 = await ethers.getContractFactory('Composite721');
+  const MultiMintShop721 = await ethers.getContractFactory('MultiMintShop721');
 
   // Create a variable to track the total gas cost of deployment.
   let totalGasCost = ethers.utils.parseEther('0');
 
   // Deploy the testing Composite721 item contract.
-  let composite721 = await Composite721.connect(deployer.signer).deploy(
-    ITEM_NAME,
-    ITEM_SYMBOL,
-    CAP,
-    ethers.constants.AddressZero,
-    [1000,1000,0,0]
-  );
+  let multiMintShop = await MultiMintShop721.connect(alice.signer).deploy();
+  let composite721Deployed = await multiMintShop.deployed();
 
-  let composite721Deployed = await composite721.deployed();
   console.log('');
   console.log(`* Item collection deployed to: ${composite721.address}`);
   totalGasCost = totalGasCost.add(

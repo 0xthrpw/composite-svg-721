@@ -17,7 +17,7 @@ const generateImage = async function( metadata, filename ) {
     const decodedImage = Buffer.from(imageData, 'base64');
     const imageString = decodedImage.toString('ascii');
 
-    fs.writeFileSync(`test/${filename}.svg`, imageString);
+    fs.writeFileSync(`art/${filename}.svg`, imageString);
 }
 
 /**
@@ -40,7 +40,8 @@ describe('SVG General', function() {
 
     // Deploy a fresh set of smart contracts, using these constants, for testing.
 
-    let ship721, droneA, droneB, motor, laserWeaponA, laserWeaponB, droneUpgrade;
+    let ship721, droneA, droneB, laserWeaponA, laserWeaponB, droneUpgrade;
+    let motorA, motorB, motorC, motorD;
     let bodyRed, bodyGreen, bodyBlue, bodyYellow, bodyPurple, bodyCyan;
 
     beforeEach(async () => {
@@ -73,15 +74,45 @@ describe('SVG General', function() {
         );
         await droneB.deployed();
 
-        motor = await Composite721.connect(alice.signer).deploy(
-            "Motor721",
-            "MOTOR721",
+        motorA = await Composite721.connect(alice.signer).deploy(
+            "MotorA721",
+            "MOTORA721",
             200,
             ship721.address,
-            [200,200,50,400]
+            [200,300,50,400]
         );
                 
-        await motor.deployed();
+        await motorA.deployed();
+
+        motorB = await Composite721.connect(alice.signer).deploy(
+            "MotorB721",
+            "MOTORB721",
+            200,
+            ship721.address,
+            [200,300,50,400]
+        );
+                
+        await motorB.deployed();
+
+        motorC = await Composite721.connect(alice.signer).deploy(
+            "MotorC721",
+            "MOTORC721",
+            200,
+            ship721.address,
+            [200,300,50,400]
+        );
+                
+        await motorC.deployed();
+
+        motorD = await Composite721.connect(alice.signer).deploy(
+            "MotorD721",
+            "MOTORD721",
+            200,
+            ship721.address,
+            [200,300,50,400]
+        );
+                
+        await motorD.deployed();
 
         laserWeaponA = await Composite721.connect(alice.signer).deploy(
             "WeaponA721",
@@ -171,7 +202,10 @@ describe('SVG General', function() {
         await droneB.mint(bob.address, 2);
         await droneUpgrade.mint(bob.address, 2);
 
-        await motor.mint(bob.address, 2);
+        await motorA.mint(bob.address, 2);
+        await motorB.mint(bob.address, 2);
+        await motorC.mint(bob.address, 2);
+        await motorD.mint(bob.address, 2);
 
         await laserWeaponA.mint(bob.address, 2);
         await laserWeaponB.mint(bob.address, 2);
@@ -254,14 +288,14 @@ describe('SVG General', function() {
             <rect fill="rgb(0,255,255)" width="45" height="49" x="44" y="106" />
             `;
 
-            await motor.connect(alice.signer).setBaseLayer(motor_A);
-            await motor.connect(alice.signer).toggleComponent(true);
+            await motorA.connect(alice.signer).setBaseLayer(motor_A);
+            await motorA.connect(alice.signer).toggleComponent(true);
 
             await ship721.connect(bob.signer).setLayer(
                 1, 
                 1,
                 [
-                    motor.address,
+                    motorA.address,
                     1
                 ]
             );
@@ -473,6 +507,86 @@ describe('SVG General', function() {
                     1
                 ]
             );
+
+            const motor_B = `
+            <rect fill="rgb(102,102,102)" width="35" height="183" x="154" y="6" />
+            <rect fill="rgb(179,179,179)" width="18" height="160" x="135" y="18" />
+            <rect fill="rgb(128,128,128)" width="29" height="148" x="107" y="24" />
+            <rect fill="rgb(0,255,255)" width="53" height="136" x="53" y="30" />
+            <rect fill="rgb(0,255,255)" width="24"  height="136" x="18" y="30" />
+            `;
+
+            await motorB.connect(alice.signer).setBaseLayer(motor_B);
+            await motorB.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                4, 
+                1,
+                [
+                    motorB.address,
+                    1
+                ]
+            );
+
+            const motor_C = `
+            <rect fill="rgb(102,102,102)" width="35" height="243" x="145" y="6" />
+            <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="18" />
+            <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="24" />
+            <rect fill="rgb(255,255,128)" width="45" height="49" x="44" y="30" />
+            <rect fill="rgb(255,255,85)" width="23" height="47" x="9" y="30" />
+            <rect fill="rgb(255,255,85)" width="23" height="47" x="9" y="106" />
+            <rect fill="rgb(255,255,85)" width="23" height="47" x="9" y="180" />
+            <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="93" />
+            <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="100" />
+            <rect fill="rgb(128,128,128)" width="36" height="61" x="89" y="174" />
+            <rect fill="rgb(255,255,128)" width="45" height="49" x="44" y="106" />
+            <rect fill="rgb(255,255,128)" width="45" height="49" x="45" y="180" />
+            <rect fill="rgb(179,179,179)" width="18" height="73" x="126" y="170" />
+            `;
+
+            await motorC.connect(alice.signer).setBaseLayer(motor_C);
+            await motorC.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                6, 
+                1,
+                [
+                    motorC.address,
+                    1
+                ]
+            );
+
+            const motor_D = `
+            <rect fill="rgb(179,179,179)" width="18" height="146" x="126" y="18" />
+            <rect fill="rgb(128,128,128)" width="36" height="161" x="89" y="24" />
+            <rect fill="rgb(102,102,102)" width="35" height="243" x="145" y="6" />
+
+            <rect fill="rgb(240,128,255)" width="24" height="130" x="65" y="30" />
+            <rect fill="rgb(240,200,255)" width="30" height="100" x="10" y="45" />
+
+            <rect fill="rgb(255,180,255)" width="15" height="130" x="45" y="30" />
+
+            <rect fill="rgb(255,230,128)" width="15" height="50" x="45" y="180" />
+            <rect fill="rgb(255,238,170)" width="10" height="50" x="30" y="180" />
+            <rect fill="rgb(255,246,213)" width="5" height="50" x="20" y="180" />
+            <rect fill="rgb(179,179,179)" width="18" height="74" x="127" y="170" />
+            <rect fill="rgb(128,128,128)" width="37" height="62" x="90" y="174" />
+            <rect fill="rgb(255,204,0)" width="25" height="49" x="65" y="180" />
+            `;
+
+            await motorD.connect(alice.signer).setBaseLayer(motor_D);
+            await motorD.connect(alice.signer).toggleComponent(true);
+
+            await ship721.connect(bob.signer).setLayer(
+                3, 
+                1,
+                [
+                    motorD.address,
+                    1
+                ]
+            );
+
+
             
             let metadata = await ship721.connect(bob.signer).tokenURI(1);
             await generateImage(metadata, "ship");
@@ -498,6 +612,18 @@ describe('SVG General', function() {
 
             metadata = await droneUpgrade.connect(bob.signer).tokenURI(2);
             await generateImage(metadata, "drone_upgrade");
+
+            metadata = await motorA.connect(bob.signer).tokenURI(1);
+            await generateImage(metadata, "motorA");
+
+            metadata = await motorB.connect(bob.signer).tokenURI(1);
+            await generateImage(metadata, "motorB");
+
+            metadata = await motorC.connect(bob.signer).tokenURI(1);
+            await generateImage(metadata, "motorC");
+
+            metadata = await motorD.connect(bob.signer).tokenURI(1);
+            await generateImage(metadata, "motorD");
 
         });
     });

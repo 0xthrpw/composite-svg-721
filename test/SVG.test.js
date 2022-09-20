@@ -217,7 +217,7 @@ describe('SVG General', function() {
 
             //console.log("decodedImage", imageString);
 
-            fs.writeFileSync('test/svgflight.svg', imageString);
+            fs.writeFileSync('art/svgflight.svg', imageString);
         });
     });
 });

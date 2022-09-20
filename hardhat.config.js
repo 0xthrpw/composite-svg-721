@@ -4,7 +4,7 @@
 require('dotenv').config();
 
 // Include Babel so that we may use some newer JavaScript syntax.
-//require('@babel/register');
+require('@babel/register');
 
 // Include Waffle with Ethers as our preferred engine for testing.
 require('@nomiclabs/hardhat-waffle');
