@@ -30,38 +30,18 @@ async function main() {
   let totalGasCost = ethers.utils.parseEther('0');
 
   // Deploy the testing Composite721 item contract.
-  let multiMintShop = await MultiMintShop721.connect(alice.signer).deploy();
-  let composite721Deployed = await multiMintShop.deployed();
+  let multiMintShop = await MultiMintShop721.connect(deployer.signer).deploy();
+  let multiMintShopDeployed = await multiMintShop.deployed();
 
   console.log('');
-  console.log(`* Item collection deployed to: ${composite721.address}`);
+  console.log(`* Multi Mint Shop deployed to: ${multiMintShop.address}`);
   totalGasCost = totalGasCost.add(
-    await logTransactionGas(composite721Deployed.deployTransaction)
+    await logTransactionGas(multiMintShopDeployed.deployTransaction)
   );
 
   // Log a verification command.
   console.log(`[VERIFY] npx hardhat verify --network rinkeby \
-    ${composite721.address} --constructor-args scripts/args/composite-args.js`);
-
-  const svgGrid = `
-  <rect fill="rgb(0,0,0)" width="1000" height="1000" x="0" y="0" />
-  <rect fill="rgb(204,204,204)" width="625" height="62" x="248" y="540" />
-  <rect fill="rgb(236,236,236)" width="385" height="104" x="248" y="436" />
-  <rect fill="rgb(0,255,255)" width="156" height="98" x="635" y="440" />
-  <rect fill="rgb(236,236,236)" width="94" height="83" x="290" y="290" />
-  <rect fill="rgb(204,204,204)" width="260" height="62" x="268" y="373" />
-  <rect fill="rgb(204,204,204)" width="385" height="52" x="299" y="602" />
-  <rect fill="rgb(179,179,179)" width="160" height="52" x="299" y="654" />
-  <rect fill="rgb(102,102,102)" width="240" height="20" x="299" y="706" />
-  <rect fill="rgb(102,102,102)" width="62" height="125" x="247" y="602" />
-  <rect fill="rgb(102,102,102)" width="27" height="104" x="219" y="477" />`;
-
-  const setBaseLayerTx = await composite721.connect(deployer.signer).setBaseLayer(svgGrid);
-  console.log('');
-  console.log(`* Base layer set successfully`);
-  totalGasCost = totalGasCost.add(
-    await logTransactionGas(setBaseLayerTx)
-  );
+    ${multiMintShop.address} --constructor-args scripts/args/composite-args.js`);
 
   // Log the final gas cost of deployment.
   console.log('');

@@ -1,12 +1,12 @@
 module.exports = [
-  "Drone A",
-  "drnA",
-  100,
+  "Paint E",
+  "sssPNT_E",
+  300,
   "0xfb6c7cc444366655fb57301a6afca531abd2f591",
   [
-    300,
-    200,
-    600,
-    100
+    700,
+    450,
+    206,
+    279
   ]
 ]
