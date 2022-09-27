@@ -26,6 +26,10 @@ contract Composite721 is Tiny721, OnChainMeta {
         uint256 id;
     }
 
+    string public attributes;
+
+    string public description;
+
     /// Dimension settings
     OnChainMeta.Dimensions public dimensions;
 
@@ -79,11 +83,15 @@ contract Composite721 is Tiny721, OnChainMeta {
         string memory _symbol,
         uint256 _cap,
         address _substrate,
-        Dimensions memory _dimensions
+        Dimensions memory _dimensions,
+        string memory _attributes,
+        string memory _description
     ) Tiny721(_name, _symbol, _cap) {
         substrates[_substrate] = true;
         substrates[address(this)] = true;
         dimensions = _dimensions;
+        attributes = _attributes;
+        description = _description;
     }
 
 
@@ -216,7 +224,7 @@ contract Composite721 is Tiny721, OnChainMeta {
     ) external view virtual override returns (string memory) {
         if (!_exists(_id)) { revert URIQueryForNonexistentToken(); }
 
-        return _buildMeta(_id, this.svgData(_id, 0));
+        return _buildMeta(_id, this.svgData(_id, 0), attributes, description, name);
     }
 
 
@@ -426,5 +434,22 @@ contract Composite721 is Tiny721, OnChainMeta {
         globalLayers[_layerId] = _layer;
     }
 
+    /**
+        Set the metadata attributes of the token.
+
+        @param _attributes The attributes to set for this item.
+    */
+    function setAttributes ( string memory _attributes ) external onlyOwner {
+        attributes = _attributes;
+    }
+
+    /**
+        Set the metadata description of the token.
+
+        @param _description The description to set for this item.
+    */
+    function setDescription ( string memory _description ) external onlyOwner {
+        description = _description;
+    }
 
 }

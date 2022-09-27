@@ -5,15 +5,25 @@ const { ethers } = require('hardhat');
 const fs = require('fs');
 
 // These are the constants for the item contract.
-const ITEM_NAME = 'Paint E';
-const ITEM_SYMBOL = 'sssPNT_E';
+const ITEM_NAME = 'Purple Paint';
+const ITEM_SYMBOL = 'sPAINTe';
 const CAP = 300;
-const SUBSTRATE_ADDRESS = '0xfb6c7cc444366655fb57301a6afca531abd2f591';
-const SETTINGS = [700,450,206,279]
+const SUBSTRATE_ADDRESS = '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143';
+const SETTINGS = [700,450,206,279];
+const ATTRIBUTES = `{
+  "trait_type": "Type",
+  "value": "Cosmetic"
+},{
+  "trait_type": "Color",
+  "value": "Purple"
+}`;
+
+const DESCRIPTION = 'Super paint job for a super space ship';
+
 
 let SVG_DATA = 
 `<rect fill="rgb(170,0,170)" width="625" height="62.5" x="42" y="260" />
-<rect fill="rgb(212,0,212)" width="385" height="104" x="42." y="156" />
+<rect fill="rgb(212,0,212)" width="385" height="104" x="42" y="156" />
 <rect fill="rgb(212,0,212)" width="93.75" height="83" x="84" y="10" />
 <rect fill="rgb(170,0,170)" width="260" height="62.5" x="63" y="93" />
 <rect fill="rgb(170,0,170)" width="385" height="52" x="94" y="322.5" />
@@ -54,7 +64,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     SUBSTRATE_ADDRESS,
-    SETTINGS
+    SETTINGS,
+    ATTRIBUTES,
+    DESCRIPTION
   );
 
   let composite721Deployed = await composite721.deployed();
@@ -69,7 +81,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     SUBSTRATE_ADDRESS,
-    SETTINGS
+    SETTINGS,
+    ATTRIBUTES,
+    DESCRIPTION
   ];
   fs.writeFileSync('scripts/args/composite-args.js', `module.exports = ${JSON.stringify(deploymentArgs, null, 2)}`);
 

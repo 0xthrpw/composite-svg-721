@@ -11,21 +11,21 @@ async function logTransactionGas(transaction) {
 async function main() {
 
     let items = [   
-        '0xFb6c7CC444366655fb57301A6AFcA531abd2f591',
-        '0xA87611B03963e0e137D8DCb18B2CcF82Aaff7104',
-        '0x30497f7bb16b128ACEe78c351A8eBC3865541958',
-        '0xCD46d419a9D92fD67A1E5D4b7D50D70a173dbdFA',
-        '0x7fD0f09153663D87C984af921c95B9C92dCaA4fe',
-        '0xb9602bD697b28745E370C00346c2516375c89367',
-        '0xc8Ea805be9BA8E21FA3C0Ad72fB9f1351360b8f8',
-        '0xeE22C5A689cFa34D5BfB0A21d1aBD42c4CdC7391',
-        '0x7DF91b90f38CFbb481eE7693C168834bEfF1e808',
-        '0xC05E8e5eEcc478c772579A373DB69cA536Ca15a4',
-        '0x4C5abb9e0c1da2A7cDb6eb44354251C54363c790',
-        '0x57eB72D124fC6f3fa56EB23fC539F55E1c23a5F1',
-        '0xb9D4AabcB73A863E7F4b6efE866Ce1729fbB6466',
-        '0x2caF0a780e26969F1210209610ceD3a26798C0e4',
-        '0x3d3B94b8e4bebc2814dec6e9C449E8132b0E218a'
+        '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143', //sub
+        '0x1385878782B0263E4A126deFAE72b3E204Ae7954', //drone
+        '0x936069c48aBF53BE0E82Bf3cD1f42cc158e92C7F',
+        '0x15C0D4691311bB9C8Bdc316fa5C048B60cC3cf72', //engine
+        '0x78B6799b1F486CFb233036234e1427eF99924367',
+        '0xE473EEc1d346D00e2810c64B76927A8E33F59CaA', 
+        '0xb38Ad84533D75C994aCD9020E618443E78d088ae',
+        '0x02Ee1d7b68239124Fbc542d8B42d8f0c08Ca4A50', //weapon
+        '0x7ac2D0C383eff8cC30B5ec01f62A8A9181387392',
+        '0xb63761f6FaB8dc8B867Ae05Aa3bEe9C3711f9aaA', //paint
+        '0xEDF9883Dc7e0c8f170bb1793727Ce5D82e03e300',
+        '0xEA6458D6Ee28C59bE02B65B0FafB054dE391C497',
+        '0x8591bF4E504602ADdaD613d851930A89cb4dD78a',
+        '0x5C9C5dD4F4Ef882F7f21FB91F6eBaC6014a0198b',
+        '0x87E9B0bA043B90037D73E0eB67cFa2Fd29C9935b'
     ]
 
     let totalGasCost = ethers.utils.parseEther('0');
@@ -33,7 +33,7 @@ async function main() {
     const signers = await ethers.getSigners();
     const addresses = await Promise.all(signers.map(async signer => signer.getAddress()));
 
-    const MULTIMINTSHOP_ADDRESS = '0x207E032d9A0D403036080FC3E15d8D0b6a6AE2ED';
+    const MULTIMINTSHOP_ADDRESS = '0x045a0963cebCE41ADA93A6C9DF1a49B5Cf97e3F3';
 
     const deployer = { provider: signers[0].provider, signer: signers[0], address: addresses[0] };
 

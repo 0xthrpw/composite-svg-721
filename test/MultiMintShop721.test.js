@@ -43,7 +43,9 @@ describe('Multi Mint Shop', function () {
         "SUBSTR",
         555,
         ethers.constants.AddressZero,
-        [1000,1000,0,0]
+        [1000,1000,0,0],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await ship721.deployed();
 
@@ -52,7 +54,9 @@ describe('Multi Mint Shop', function () {
         "DRONEA721",
         100,
         ship721.address,
-        [300,200,600,100]
+        [300,200,600,100],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await droneA.deployed();
 
@@ -61,7 +65,9 @@ describe('Multi Mint Shop', function () {
         "DRONEB721",
         100,
         ship721.address,
-        [300,200,600,100]
+        [300,200,600,100],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await droneB.deployed();
 
@@ -70,7 +76,9 @@ describe('Multi Mint Shop', function () {
         "MOTORA721",
         200,
         ship721.address,
-        [200,300,50,400]
+        [200,300,50,400],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
             
     await motorA.deployed();
@@ -80,7 +88,9 @@ describe('Multi Mint Shop', function () {
         "MOTORB721",
         200,
         ship721.address,
-        [200,300,50,400]
+        [200,300,50,400],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
             
     await motorB.deployed();
@@ -90,7 +100,9 @@ describe('Multi Mint Shop', function () {
         "MOTORC721",
         200,
         ship721.address,
-        [200,300,50,400]
+        [200,300,50,400],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
             
     await motorC.deployed();
@@ -100,7 +112,9 @@ describe('Multi Mint Shop', function () {
         "MOTORD721",
         200,
         ship721.address,
-        [200,300,50,400]
+        [200,300,50,400],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
             
     await motorD.deployed();
@@ -110,7 +124,9 @@ describe('Multi Mint Shop', function () {
         "WEAPONA721",
         300,
         ship721.address,
-        [500,100,200,700]
+        [500,100,200,700],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await laserWeaponA.deployed();
 
@@ -119,7 +135,9 @@ describe('Multi Mint Shop', function () {
         "WEAPONB721",
         300,
         ship721.address,
-        [500,100,200,700]
+        [500,100,200,700],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await laserWeaponB.deployed();
 
@@ -128,7 +146,9 @@ describe('Multi Mint Shop', function () {
         "dUPG",
         300,
         droneA.address,
-        [300,200,0,0]
+        [300,200,0,0],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await droneUpgrade.deployed();
 
@@ -137,7 +157,9 @@ describe('Multi Mint Shop', function () {
         "bUPG",
         300,
         ship721.address,
-        [700,450,206,279]
+        [700,450,206,279],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await bodyRed.deployed();
 
@@ -146,7 +168,9 @@ describe('Multi Mint Shop', function () {
         "bUPG",
         300,
         ship721.address,
-        [700,450,206,279]
+        [700,450,206,279],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await bodyGreen.deployed();
 
@@ -155,7 +179,9 @@ describe('Multi Mint Shop', function () {
         "bUPG",
         300,
         ship721.address,
-        [700,450,206,279]
+        [700,450,206,279],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await bodyBlue.deployed();
 
@@ -165,7 +191,9 @@ describe('Multi Mint Shop', function () {
         "bUPG",
         300,
         ship721.address,
-        [700,450,206,279]
+        [700,450,206,279],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await bodyYellow.deployed();
 
@@ -174,7 +202,9 @@ describe('Multi Mint Shop', function () {
         "bUPG",
         300,
         ship721.address,
-        [700,450,206,279]
+        [700,450,206,279],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await bodyPurple.deployed();
 
@@ -183,7 +213,9 @@ describe('Multi Mint Shop', function () {
         "bUPG",
         300,
         ship721.address,
-        [700,450,206,279]
+        [700,450,206,279],
+        '{ "trait_type": "Trait", "value": "Dummy" }',
+        "description"
     );
     await bodyCyan.deployed();
 

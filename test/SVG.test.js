@@ -36,7 +36,9 @@ describe('SVG General', function() {
             "SUBSTR",
             555,
             ethers.constants.AddressZero,
-            [1000,1000,0,0]
+            [1000,1000,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await substrate721.deployed();
 
@@ -45,7 +47,9 @@ describe('SVG General', function() {
             "C1",
             100,
             substrate721.address,
-            [100,100,0,0]
+            [100,100,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await composite721_1.deployed();
 
@@ -54,7 +58,9 @@ describe('SVG General', function() {
             "C2",
             200,
             substrate721.address,
-            [100,100,0,0]
+            [100,100,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
                 
         await composite721_2.deployed();
@@ -64,7 +70,9 @@ describe('SVG General', function() {
             "C3",
             300,
             substrate721.address,
-            [100,100,0,0]
+            [100,100,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await composite721_3.deployed();
 
@@ -73,7 +81,9 @@ describe('SVG General', function() {
             "C4",
             300,
             substrate721.address,
-            [100,100,0,0]
+            [100,100,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await composite721_4.deployed();
 
@@ -82,7 +92,9 @@ describe('SVG General', function() {
             "C45",
             300,
             substrate721.address,
-            [100,100,0,0]
+            [100,100,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await composite721_5.deployed();
 

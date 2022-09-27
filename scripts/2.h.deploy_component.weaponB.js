@@ -5,11 +5,27 @@ const { ethers } = require('hardhat');
 const fs = require('fs');
 
 // These are the constants for the item contract.
-const ITEM_NAME = 'Weapon B';
-const ITEM_SYMBOL = 'sssWPN_B';
+const ITEM_NAME = 'Dual Blaster';
+const ITEM_SYMBOL = 'sBLASTb';
 const CAP = 300;
-const SUBSTRATE_ADDRESS = '0xfb6c7cc444366655fb57301a6afca531abd2f591';
+const SUBSTRATE_ADDRESS = '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143';
 const SETTINGS = [500,100,200,700]
+const ATTRIBUTES = `{
+  "trait_type": "Type",
+  "value": "Weapon"
+},{
+  "trait_type": "Class",
+  "value": "Blaster"
+},{
+  "trait_type": "Burst",
+  "value": "2"
+},{
+  "trait_type": "Count",
+  "value": "2"
+}`;
+
+const DESCRIPTION = 'Dual blaster cannons that fire multiple round at a time.';
+
 
 let SVG_DATA = 
 `<rect fill="rgb(255,255,255)" width="350" height="45" x="40" y="5" />
@@ -58,7 +74,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     SUBSTRATE_ADDRESS,
-    SETTINGS
+    SETTINGS,
+    ATTRIBUTES,
+    DESCRIPTION
   );
 
   let composite721Deployed = await composite721.deployed();
@@ -73,7 +91,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     SUBSTRATE_ADDRESS,
-    SETTINGS
+    SETTINGS,
+    ATTRIBUTES,
+    DESCRIPTION
   ];
   fs.writeFileSync('scripts/args/composite-args.js', `module.exports = ${JSON.stringify(deploymentArgs, null, 2)}`);
 

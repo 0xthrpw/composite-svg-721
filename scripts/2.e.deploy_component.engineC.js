@@ -5,11 +5,23 @@ const { ethers } = require('hardhat');
 const fs = require('fs');
 
 // These are the constants for the item contract.
-const ITEM_NAME = 'Engine C';
-const ITEM_SYMBOL = 'sssENG_C';
+const ITEM_NAME = 'Triple Light Drive';
+const ITEM_SYMBOL = 'sDRIVEc';
 const CAP = 200;
-const SUBSTRATE_ADDRESS = '0xfb6c7cc444366655fb57301a6afca531abd2f591';
+const SUBSTRATE_ADDRESS = '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143';
 const SETTINGS = [200,300,50,400]
+const ATTRIBUTES = `{
+  "trait_type": "Type",
+  "value": "Engine"
+},{
+  "trait_type": "Class",
+  "value": "Light Drive"
+},{
+  "trait_type": "Speed",
+  "value": "10"
+}`;
+
+const DESCRIPTION = 'Three light drives configured to get you where you need to go, quickly.';
 
 let SVG_DATA = 
 `<rect fill="rgb(102,102,102)" width="35" height="243" x="145" y="6" />
@@ -60,7 +72,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     SUBSTRATE_ADDRESS,
-    SETTINGS
+    SETTINGS,
+    ATTRIBUTES,
+    DESCRIPTION
   );
 
   let composite721Deployed = await composite721.deployed();
@@ -75,7 +89,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     SUBSTRATE_ADDRESS,
-    SETTINGS
+    SETTINGS,
+    ATTRIBUTES,
+    DESCRIPTION
   ];
   fs.writeFileSync('scripts/args/composite-args.js', `module.exports = ${JSON.stringify(deploymentArgs, null, 2)}`);
 

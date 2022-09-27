@@ -8,8 +8,6 @@ contract OnChainMeta {
     using Strings for uint256;
     using Strings for uint128;
 
-    string public metaDescription = 'Composites';
-
     struct Dimensions {
       uint128 width;
       uint128 height;
@@ -17,20 +15,32 @@ contract OnChainMeta {
       uint128 y;
     }
 
-    function _buildMeta(uint256 _tokenId, string memory _svgData) internal view returns (string memory) {
+    function _buildMeta(
+      uint256 _tokenId, 
+      string memory _svgData, 
+      string memory _attributes, 
+      string memory _description,
+      string memory _name
+    ) internal pure returns (string memory) {
+
+      string memory attrs = string(abi.encodePacked(
+        _getTraits(_tokenId),
+        ',',
+        _attributes
+      ));
 
       string memory metadata = string(abi.encodePacked(
         '{"name":"',
-           _buildName(_tokenId),
+           _buildName(_tokenId, _name),
           '",',
           '"description":"',
-             metaDescription,
+             _description,
           '",',
           '"image":"',
           'data:image/svg+xml;base64,',
             Base64.encode(bytes(_svgData)),
           '", "attributes":[',
-             _getTraits(_tokenId),
+          attrs,
           ']',
         '}')
       );
@@ -43,13 +53,16 @@ contract OnChainMeta {
       return encodedMetadata;
     }
 
-    function _buildName(uint256 _tokenId) internal pure returns (string memory) {
-      return string(abi.encodePacked("Composite #", _tokenId.toString()));
+    function _buildName(uint256 _tokenId, string memory _name) internal pure returns (string memory) {
+      return string(abi.encodePacked(
+        _name,
+        " #",
+        _tokenId.toString()
+      ));
     }
 
     function _getTraits(uint256 _tokenId) internal pure returns (string memory) {
       string memory metadata = string(abi.encodePacked(
-        // _wrapTrait("Generation", groupId.toString()),',',
         _wrapTrait("Identifier", _tokenId.toString())
       ));
 

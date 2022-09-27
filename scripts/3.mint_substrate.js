@@ -5,7 +5,7 @@ async function main() {
   const signers = await ethers.getSigners();
   const addresses = await Promise.all(signers.map(async signer => signer.getAddress()));
 
-  const TOKEN_INSTANCE = '0xFb6c7CC444366655fb57301A6AFcA531abd2f591';
+  const TOKEN_INSTANCE = '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143';
   const RECEIVER = '0x2425124064f82bF68C6844fec4515B071D4B821a';
 
   const deployer = { provider: signers[0].provider, signer: signers[0], address: addresses[0] };

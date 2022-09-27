@@ -52,7 +52,9 @@ describe('SVG General', function() {
             "SUBSTR",
             555,
             ethers.constants.AddressZero,
-            [1000,1000,0,0]
+            [1000,1000,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await ship721.deployed();
 
@@ -61,7 +63,9 @@ describe('SVG General', function() {
             "DRONEA721",
             100,
             ship721.address,
-            [300,200,600,100]
+            [300,200,600,100],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await droneA.deployed();
 
@@ -70,7 +74,9 @@ describe('SVG General', function() {
             "DRONEB721",
             100,
             ship721.address,
-            [300,200,600,100]
+            [300,200,600,100],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await droneB.deployed();
 
@@ -79,7 +85,9 @@ describe('SVG General', function() {
             "MOTORA721",
             200,
             ship721.address,
-            [200,300,50,400]
+            [200,300,50,400],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
                 
         await motorA.deployed();
@@ -89,7 +97,9 @@ describe('SVG General', function() {
             "MOTORB721",
             200,
             ship721.address,
-            [200,300,50,400]
+            [200,300,50,400],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
                 
         await motorB.deployed();
@@ -99,7 +109,9 @@ describe('SVG General', function() {
             "MOTORC721",
             200,
             ship721.address,
-            [200,300,50,400]
+            [200,300,50,400],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
                 
         await motorC.deployed();
@@ -109,7 +121,9 @@ describe('SVG General', function() {
             "MOTORD721",
             200,
             ship721.address,
-            [200,300,50,400]
+            [200,300,50,400],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
                 
         await motorD.deployed();
@@ -119,7 +133,9 @@ describe('SVG General', function() {
             "WEAPONA721",
             300,
             ship721.address,
-            [500,100,200,700]
+            [500,100,200,700],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await laserWeaponA.deployed();
 
@@ -128,7 +144,9 @@ describe('SVG General', function() {
             "WEAPONB721",
             300,
             ship721.address,
-            [500,100,200,700]
+            [500,100,200,700],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await laserWeaponB.deployed();
 
@@ -137,7 +155,9 @@ describe('SVG General', function() {
             "dUPG",
             300,
             droneA.address,
-            [300,200,0,0]
+            [300,200,0,0],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await droneUpgrade.deployed();
 
@@ -146,7 +166,9 @@ describe('SVG General', function() {
             "bUPG",
             300,
             ship721.address,
-            [700,450,206,279]
+            [700,450,206,279],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await bodyRed.deployed();
 
@@ -155,7 +177,9 @@ describe('SVG General', function() {
             "bUPG",
             300,
             ship721.address,
-            [700,450,206,279]
+            [700,450,206,279],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await bodyGreen.deployed();
 
@@ -164,7 +188,9 @@ describe('SVG General', function() {
             "bUPG",
             300,
             ship721.address,
-            [700,450,206,279]
+            [700,450,206,279],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await bodyGreen.deployed();
 
@@ -174,7 +200,9 @@ describe('SVG General', function() {
             "bUPG",
             300,
             ship721.address,
-            [700,450,206,279]
+            [700,450,206,279],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await bodyYellow.deployed();
 
@@ -183,7 +211,9 @@ describe('SVG General', function() {
             "bUPG",
             300,
             ship721.address,
-            [700,450,206,279]
+            [700,450,206,279],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await bodyPurple.deployed();
 
@@ -192,7 +222,9 @@ describe('SVG General', function() {
             "bUPG",
             300,
             ship721.address,
-            [700,450,206,279]
+            [700,450,206,279],
+            '{ "trait_type": "Trait", "value": "Dummy" }',
+            "description"
         );
         await bodyCyan.deployed();
 

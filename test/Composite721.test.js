@@ -39,7 +39,9 @@ describe('Composite721', function() {
       SYMBOL,
       CAP,
       ethers.constants.AddressZero,
-      [1000,1000,0,0]
+      [1000,1000,0,0],
+      '{ "trait_type": "Trait", "value": "Dummy" }',
+      "description"
     );
     await composite721.deployed();
 

@@ -2,11 +2,23 @@
 
 // Imports.
 const { ethers } = require('hardhat');
+const fs = require('fs');
 
 // These are the constants for the item contract.
 const ITEM_NAME = 'SuperSpaceShip ';
 const ITEM_SYMBOL = 'SSS';
 const CAP = 555;
+
+const ATTRIBUTES = `{
+  "trait_type": "Type",
+  "value": "Space Ship"
+},{
+  "trait_type": "Class",
+  "value": "Primary Support"
+}`;
+
+const DESCRIPTION = 'A super space ship with a very important mission.';
+
 
 async function logTransactionGas(transaction) {
   let transactionReceipt = await transaction.wait();
@@ -40,7 +52,9 @@ async function main() {
     ITEM_SYMBOL,
     CAP,
     ethers.constants.AddressZero,
-    [1000,1000,0,0]
+    [1000,1000,0,0],
+    ATTRIBUTES,
+    DESCRIPTION
   );
 
   let composite721Deployed = await composite721.deployed();
@@ -54,8 +68,19 @@ async function main() {
   console.log(`[VERIFY] npx hardhat verify --network rinkeby \
     ${composite721.address} --constructor-args scripts/args/composite-args.js`);
 
+  let deploymentArgs = [
+    ITEM_NAME,
+    ITEM_SYMBOL,
+    CAP,
+    ethers.constants.AddressZero,
+    [1000,1000,0,0],
+    ATTRIBUTES,
+    DESCRIPTION
+  ];
+  fs.writeFileSync('scripts/args/composite-args.js', `module.exports = ${JSON.stringify(deploymentArgs, null, 2)}`);
+  
+
   const svgGrid = `
-  <rect fill="rgb(0,0,0)" width="1000" height="1000" x="0" y="0" />
   <rect fill="rgb(204,204,204)" width="625" height="62" x="248" y="540" />
   <rect fill="rgb(236,236,236)" width="385" height="104" x="248" y="436" />
   <rect fill="rgb(0,255,255)" width="156" height="98" x="635" y="440" />

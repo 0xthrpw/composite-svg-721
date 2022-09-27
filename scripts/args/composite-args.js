@@ -1,12 +1,14 @@
 module.exports = [
-  "Paint E",
-  "sssPNT_E",
+  "Cyan Paint",
+  "sPAINTf",
   300,
-  "0xfb6c7cc444366655fb57301a6afca531abd2f591",
+  "0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143",
   [
     700,
     450,
     206,
     279
-  ]
+  ],
+  "{\n  \"trait_type\": \"Type\",\n  \"value\": \"Cosmetic\"\n},{\n  \"trait_type\": \"Color\",\n  \"value\": \"Cyan\"\n}",
+  "Super paint job for a super space ship"
 ]

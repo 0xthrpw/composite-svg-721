@@ -72,7 +72,7 @@ contract MultiMintShop721 is Ownable, ReentrancyGuard {
         }
 
         // Update sell count
-        pool.sellCount = pool.sellCount + _amount;
+        pools[_poolId].sellCount = pool.sellCount + _amount;
 
         // Mint items to user
         IComposite721(pool.collection).mint(msg.sender, _amount);
