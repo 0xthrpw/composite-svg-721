@@ -8,7 +8,7 @@ const fs = require('fs');
 const ITEM_NAME = 'Single Blaster';
 const ITEM_SYMBOL = 'sBLASTa';
 const CAP = 300;
-const SUBSTRATE_ADDRESS = '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143';
+const SUBSTRATE_ADDRESS = '0x73342Eba6bF8013EE5d5EBFA44223d93c72Dc0a1';
 const SETTINGS = [500,100,200,700]
 const ATTRIBUTES = `{
   "trait_type": "Type",

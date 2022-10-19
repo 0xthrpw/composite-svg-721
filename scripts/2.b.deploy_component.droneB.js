@@ -8,7 +8,7 @@ const fs = require('fs');
 const ITEM_NAME = 'Defense Drone';
 const ITEM_SYMBOL = 'sDRONEb';
 const CAP = 100;
-const SUBSTRATE_ADDRESS = '0xA9Da70d82668E503E7dEc5c3F8EbAa068F4B2143';
+const SUBSTRATE_ADDRESS = '0x73342Eba6bF8013EE5d5EBFA44223d93c72Dc0a1';
 const SETTINGS = [300,200,600,100]
 
 const ATTRIBUTES = `{
